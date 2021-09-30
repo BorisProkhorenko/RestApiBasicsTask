@@ -1,9 +1,9 @@
 package com.epam.esm.model;
 
-import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 
-@Component
 public class GiftCertificate {
 
     private long id;
@@ -13,6 +13,7 @@ public class GiftCertificate {
     private int duration;
     private String createDate;
     private String lastUpdateDate;
+    private List<Tag> tagList = new ArrayList<>();
 
     public GiftCertificate() {
     }
@@ -91,6 +92,14 @@ public class GiftCertificate {
         this.lastUpdateDate = lastUpdateDate;
     }
 
+    public List<Tag> getTagList() {
+        return tagList;
+    }
+
+    public void setTagList(List<Tag> tagList) {
+        this.tagList = tagList;
+    }
+
     @Override
     public String toString() {
         return "GiftCertificate{" +
@@ -101,6 +110,7 @@ public class GiftCertificate {
                 ", duration=" + duration +
                 ", createDate='" + createDate + '\'' +
                 ", lastUpdateDate='" + lastUpdateDate + '\'' +
+                ", tagList=" + tagList +
                 '}';
     }
 }

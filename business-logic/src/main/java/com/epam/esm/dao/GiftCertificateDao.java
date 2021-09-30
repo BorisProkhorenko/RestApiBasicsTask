@@ -10,9 +10,9 @@ public interface GiftCertificateDao {
 
     List<GiftCertificate> getAllCertificates();
 
-    boolean deleteCertificate(GiftCertificate certificate);
+    void deleteCertificate(GiftCertificate certificate);
 
-    boolean updateCertificate(GiftCertificate certificate);
+    GiftCertificate updateCertificate(GiftCertificate certificate);
 
-    boolean createCertificate(GiftCertificate certificate);
+    GiftCertificate createCertificate(GiftCertificate certificate);
 }

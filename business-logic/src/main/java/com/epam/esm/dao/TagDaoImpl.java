@@ -4,15 +4,16 @@ import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.util.List;
 
-@Component
-public class TagDaoImpl implements TagDao{
+@Repository
+public class TagDaoImpl implements TagDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final RowMapper<Tag> mapper;
 
     private final String SQL_FIND_TAG = "select * from tag where id = ?";
     private final String SQL_DELETE_TAG = "delete from tag where id = ?";
@@ -20,28 +21,30 @@ public class TagDaoImpl implements TagDao{
     private final String SQL_INSERT_TAG = "insert into tag(name) values(?)";
 
     @Autowired
-    public TagDaoImpl(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    public TagDaoImpl(JdbcTemplate jdbcTemplate, RowMapper<Tag> mapper) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.mapper = mapper;
     }
 
     @Override
     public Tag getTagById(Long id) {
-        return jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[] { id }, new TagMapper());
+        return jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
     }
 
     @Override
     public List<Tag> getAllTags() {
-        return jdbcTemplate.query(SQL_GET_ALL, new TagMapper());
+        return jdbcTemplate.query(SQL_GET_ALL, mapper);
     }
 
     @Override
-    public boolean deleteTag(Tag tag) {
-        return jdbcTemplate.update(SQL_DELETE_TAG, tag.getId()) > 0;
+    public void deleteTag(Tag tag) {
+        jdbcTemplate.update(SQL_DELETE_TAG, tag.getId());
     }
 
     @Override
-    public boolean createTag(Tag tag) {
-        return jdbcTemplate.update(SQL_INSERT_TAG, tag.getName()) > 0;
+    public Tag createTag(Tag tag) {
+        jdbcTemplate.update(SQL_INSERT_TAG, tag.getName());
+        return tag;
     }
 
 }

@@ -1,11 +1,17 @@
-package com.epam.esm.connection;
+package com.epam.esm.config;
 
+import com.epam.esm.mapper.GiftCertificateMapper;
+import com.epam.esm.mapper.TagMapper;
+import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.Tag;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 
 import javax.sql.DataSource;
@@ -40,4 +46,24 @@ public class AppConfig {
         dataSource.setInitialSize(size);
         return dataSource;
     }
+
+    @Bean
+    JdbcTemplate jdbcTemplate(){
+        return new JdbcTemplate(dataSource());
+    }
+
+    @Bean
+    RowMapper<GiftCertificate> giftCertificateMapper(){
+        return new GiftCertificateMapper();
+    }
+
+    @Bean
+    RowMapper<Tag> tagMapper(){
+        return new TagMapper();
+    }
+
+    /* @Bean
+    * JdbcTemplate
+    * RowMappers
+    * */
 }

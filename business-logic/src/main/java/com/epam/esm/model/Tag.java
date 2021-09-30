@@ -1,8 +1,6 @@
 package com.epam.esm.model;
 
-import org.springframework.stereotype.Component;
 
-@Component
 public class Tag {
 
     private long id;

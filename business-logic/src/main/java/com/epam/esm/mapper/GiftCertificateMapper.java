@@ -2,6 +2,7 @@ package com.epam.esm.mapper;
 
 import com.epam.esm.model.GiftCertificate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+@Component
 public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
 
     private static final String ID = "id";

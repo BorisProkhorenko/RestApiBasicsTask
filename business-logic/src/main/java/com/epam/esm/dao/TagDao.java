@@ -10,7 +10,7 @@ public interface TagDao {
 
     List<Tag> getAllTags();
 
-    boolean deleteTag(Tag tag);
+    void deleteTag(Tag tag);
 
-    boolean createTag(Tag tag);
+    Tag createTag(Tag tag);
 }
