@@ -1,8 +1,6 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.model.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -15,12 +13,12 @@ public class TagDaoImpl implements TagDao {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Tag> mapper;
 
-    private final String SQL_FIND_TAG = "select * from tag where id = ?";
+    private final String SQL_FIND_TAG = "select id as tag_id, name as tag_name from tag where id = ?";
     private final String SQL_DELETE_TAG = "delete from tag where id = ?";
-    private final String SQL_GET_ALL = "select * from tag";
+    private final String SQL_GET_ALL = "select id as tag_id, name as tag_name from tag";
     private final String SQL_INSERT_TAG = "insert into tag(name) values(?)";
 
-    @Autowired
+
     public TagDaoImpl(JdbcTemplate jdbcTemplate, RowMapper<Tag> mapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.mapper = mapper;

@@ -1,5 +1,9 @@
 package com.epam.esm.config;
 
+import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.GiftCertificateDaoImpl;
+import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.TagDaoImpl;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.model.GiftCertificate;
@@ -22,7 +26,7 @@ import java.util.Objects;
 @PropertySource("classpath:db.properties")
 public class AppConfig {
 
-   private final Environment environment;
+    private final Environment environment;
 
 
     public AppConfig(Environment environment) {
@@ -48,22 +52,27 @@ public class AppConfig {
     }
 
     @Bean
-    JdbcTemplate jdbcTemplate(){
+    JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());
     }
 
     @Bean
-    RowMapper<GiftCertificate> giftCertificateMapper(){
-        return new GiftCertificateMapper();
+    RowMapper<GiftCertificate> giftCertificateMapper() {
+        return new GiftCertificateMapper(tagMapper());
     }
 
     @Bean
-    RowMapper<Tag> tagMapper(){
+    RowMapper<Tag> tagMapper() {
         return new TagMapper();
     }
 
-    /* @Bean
-    * JdbcTemplate
-    * RowMappers
-    * */
+    @Bean
+    GiftCertificateDao giftCertificateDao() {
+        return new GiftCertificateDaoImpl(jdbcTemplate(), giftCertificateMapper());
+    }
+
+    @Bean
+    TagDao tagDao() {
+        return new TagDaoImpl(jdbcTemplate(), tagMapper());
+    }
 }

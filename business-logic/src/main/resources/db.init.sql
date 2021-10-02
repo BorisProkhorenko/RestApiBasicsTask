@@ -30,5 +30,5 @@ create table tag_gift_certificate
 );
 
 alter table tag_gift_certificate
-    add foreign key (tag_id) references tag (id),
-add foreign key(gift_certificate_id) references gift_certificate(id);
+    add foreign key (tag_id) references tag (id) ON DELETE CASCADE,
+add foreign key(gift_certificate_id) references gift_certificate(id) ON DELETE CASCADE;

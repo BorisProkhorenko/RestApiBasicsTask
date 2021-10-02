@@ -1,8 +1,8 @@
 package com.epam.esm.model;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GiftCertificate {
 
@@ -13,7 +13,7 @@ public class GiftCertificate {
     private int duration;
     private String createDate;
     private String lastUpdateDate;
-    private List<Tag> tagList = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
     public GiftCertificate() {
     }
@@ -92,12 +92,12 @@ public class GiftCertificate {
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public List<Tag> getTagList() {
-        return tagList;
+    public Set<Tag> getTags() {
+        return tags;
     }
 
-    public void setTagList(List<Tag> tagList) {
-        this.tagList = tagList;
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
     }
 
     @Override
@@ -110,7 +110,7 @@ public class GiftCertificate {
                 ", duration=" + duration +
                 ", createDate='" + createDate + '\'' +
                 ", lastUpdateDate='" + lastUpdateDate + '\'' +
-                ", tagList=" + tagList +
+                ", tags=" + tags +
                 '}';
     }
 }
