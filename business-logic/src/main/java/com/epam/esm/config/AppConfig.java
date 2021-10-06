@@ -1,21 +1,11 @@
 package com.epam.esm.config;
 
-import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.dao.GiftCertificateDaoImpl;
-import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.TagDaoImpl;
-import com.epam.esm.mapper.GiftCertificateMapper;
-import com.epam.esm.mapper.TagMapper;
-import com.epam.esm.model.GiftCertificate;
-import com.epam.esm.model.Tag;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+
 
 
 import javax.sql.DataSource;
@@ -27,25 +17,39 @@ import java.util.Objects;
 public class AppConfig {
 
     private final Environment environment;
+    private final ApplicationContext context;
+
+    private static final String PROD_URL = "db.prod.url";
+    private static final String DEV_URL = "db.dev.url";
+    private static final String LOGIN = "db.login";
+    private static final String DRIVER = "db.driver";
+    private static final String PASSWORD = "db.password";
+    private static final String SIZE = "db.size";
 
 
-    public AppConfig(Environment environment) {
+    public AppConfig(Environment environment, ApplicationContext context ) {
         this.environment = environment;
+        this.context = context;
     }
 
-    private final String URL = "url";
-    private final String LOGIN = "login";
-    private final String DRIVER = "driver";
-    private final String PASSWORD = "password";
-    private final String SIZE = "size";
+    @Bean(name = "DataSource")
+    @Profile({"dev"})
+    public DataSource dev() {
+        return dataSource(DEV_URL,LOGIN,PASSWORD,DRIVER);
+    }
 
-    @Bean
-    DataSource dataSource() {
+    @Bean(name = "DataSource")
+    @Profile({"prod", "default"})
+    public DataSource prod() {
+        return dataSource(PROD_URL,LOGIN,PASSWORD,DRIVER);
+    }
+
+    private DataSource dataSource(String url, String login, String password, String driver) {
         BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl(environment.getProperty(URL));
-        dataSource.setUsername(environment.getProperty(LOGIN));
-        dataSource.setPassword(environment.getProperty(PASSWORD));
-        dataSource.setDriverClassName(environment.getProperty(DRIVER));
+        dataSource.setUrl(environment.getProperty(url));
+        dataSource.setUsername(environment.getProperty(login));
+        dataSource.setPassword(environment.getProperty(password));
+        dataSource.setDriverClassName(environment.getProperty(driver));
         int size = Integer.parseInt(Objects.requireNonNull(environment.getProperty(SIZE)));
         dataSource.setInitialSize(size);
         return dataSource;
@@ -53,26 +57,10 @@ public class AppConfig {
 
     @Bean
     JdbcTemplate jdbcTemplate() {
-        return new JdbcTemplate(dataSource());
+        return new JdbcTemplate(context.getBean(DataSource.class));
     }
 
-    @Bean
-    RowMapper<GiftCertificate> giftCertificateMapper() {
-        return new GiftCertificateMapper(tagMapper());
-    }
 
-    @Bean
-    RowMapper<Tag> tagMapper() {
-        return new TagMapper();
-    }
 
-    @Bean
-    GiftCertificateDao giftCertificateDao() {
-        return new GiftCertificateDaoImpl(jdbcTemplate(), giftCertificateMapper());
-    }
 
-    @Bean
-    TagDao tagDao() {
-        return new TagDaoImpl(jdbcTemplate(), tagMapper());
-    }
 }

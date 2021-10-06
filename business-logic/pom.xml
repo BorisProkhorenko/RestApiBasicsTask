@@ -10,9 +10,13 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+
     <groupId>com.epam</groupId>
     <artifactId>business-logic</artifactId>
+    <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
+
+
 
 <dependencies>
     <dependency>

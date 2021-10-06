@@ -22,11 +22,12 @@ public class TagService {
     }
 
     public List<Tag> getAllTags() {
+
         return dao.getAllTags();
     }
 
-    public void deleteTag(Tag tag) {
-        dao.deleteTag(tag);
+    public void deleteTag(Long id) {
+        dao.deleteTagById(id);
     }
 
     public Tag createTag(Tag tag) {

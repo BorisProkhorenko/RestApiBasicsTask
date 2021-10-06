@@ -5,6 +5,7 @@ import com.epam.esm.model.Tag;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -17,7 +18,7 @@ import java.util.TimeZone;
 @Component
 public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
 
-    private RowMapper<Tag> tagRowMapper;
+    private final RowMapper<Tag> tagRowMapper;
 
     private static final String ID = "gc_id";
     private static final String NAME = "gc_name";
@@ -45,12 +46,32 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
         certificate.setCreateDate(toISOFormatDate(createDate));
         Date lastUpdateDate = resultSet.getTimestamp(LAST_UPDATE_DATE);
         certificate.setLastUpdateDate(toISOFormatDate(lastUpdateDate));
+
+        return mapTags(certificate, resultSet, i);
+    }
+
+    private GiftCertificate mapTags(GiftCertificate certificate, ResultSet resultSet, int i) throws SQLException {
         Set<Tag> tags = new HashSet<>();
-        while (resultSet.next()) {
+        if (resultSet.isLast()) {
             Tag tag = tagRowMapper.mapRow(resultSet, i);
             tags.add(tag);
+            certificate.setTags(tags);
+            return certificate;
+        }
+
+        while (resultSet.getLong(ID) == certificate.getId()) {
+            Tag tag = tagRowMapper.mapRow(resultSet, i);
+            tags.add(tag);
+            if(resultSet.isLast()){
+                break;
+            }
+            resultSet.next();
         }
         certificate.setTags(tags);
+
+        if (resultSet.TYPE_SCROLL_INSENSITIVE == resultSet.getType()) {
+            resultSet.previous();
+        }
         return certificate;
     }
 

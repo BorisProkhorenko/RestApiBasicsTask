@@ -13,10 +13,10 @@ public class TagDaoImpl implements TagDao {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Tag> mapper;
 
-    private final String SQL_FIND_TAG = "select id as tag_id, name as tag_name from tag where id = ?";
-    private final String SQL_DELETE_TAG = "delete from tag where id = ?";
-    private final String SQL_GET_ALL = "select id as tag_id, name as tag_name from tag";
-    private final String SQL_INSERT_TAG = "insert into tag(name) values(?)";
+    private final static String SQL_FIND_TAG = "select id as tag_id, name as tag_name from tag where id = ?";
+    private final static String SQL_DELETE_TAG = "delete from tag where id = ?";
+    private final static String SQL_GET_ALL = "select id as tag_id, name as tag_name from tag";
+    private final static String SQL_INSERT_TAG = "insert into tag(name) values(?)";
 
 
     public TagDaoImpl(JdbcTemplate jdbcTemplate, RowMapper<Tag> mapper) {
@@ -31,12 +31,13 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public List<Tag> getAllTags() {
+
         return jdbcTemplate.query(SQL_GET_ALL, mapper);
     }
 
     @Override
-    public void deleteTag(Tag tag) {
-        jdbcTemplate.update(SQL_DELETE_TAG, tag.getId());
+    public void deleteTagById(Long id) {
+        jdbcTemplate.update(SQL_DELETE_TAG, id);
     }
 
     @Override
