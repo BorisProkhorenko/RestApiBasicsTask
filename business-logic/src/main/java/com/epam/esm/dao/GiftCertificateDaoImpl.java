@@ -1,9 +1,14 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.exceptions.CertificateNotFoundException;
+import com.epam.esm.exceptions.TagAlreadyAssociatedException;
+import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.GiftCertificate;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.util.List;
@@ -35,7 +40,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
             " description = ?, price = ?, duration =  ? where id = ?";
 
     private final static String SQL_INSERT_TAG_CERTIFICATE = "insert into tag_gift_certificate(tag_id," +
-            " gift_certificate_id, values(?,?)";
+            " gift_certificate_id) values(?,?)";
 
     private final static String SQL_DELETE_TAG_CERTIFICATE = "delete from tag_gift_certificate where tag_id = ?" +
             " and gift_certificate_id = ?";
@@ -49,8 +54,13 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public GiftCertificate getCertificateById(Long id) {
-        return jdbcTemplate.queryForObject(SQL_FIND_CERTIFICATE, new Object[]{id},
-                mapper);
+        GiftCertificate certificate;
+        try {
+            certificate = jdbcTemplate.queryForObject(SQL_FIND_CERTIFICATE, new Object[]{id}, mapper);
+        } catch (DataAccessException e) {
+            throw new CertificateNotFoundException("Certificate not found ", id);
+        }
+        return certificate;
     }
 
     @Override
@@ -68,7 +78,9 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
 
     @Override
+    @Transactional
     public GiftCertificate updateCertificate(GiftCertificate certificate) {
+        getCertificateById(certificate.getId());
         jdbcTemplate.update(SQL_UPDATE_CERTIFICATE, certificate.getName(),
                 certificate.getDescription(), certificate.getPrice(), certificate.getDuration(),
                 certificate.getId());
@@ -85,9 +97,16 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public void addTag(Long id, Long tagId) {
+    @Transactional
+    public GiftCertificate addTag(Long id, Long tagId) {
+        GiftCertificate certificate = getCertificateById(id);
+        boolean tag = certificate.getTags().stream().anyMatch(t -> t.getId() == tagId);
+        if (!tag) {
+            throw new TagAlreadyAssociatedException("Tag is already associated with this certificate", id, tagId);
+        }
         jdbcTemplate.update(SQL_INSERT_TAG_CERTIFICATE,
                 tagId, id);
+        return getCertificateById(id);
     }
 
     @Override

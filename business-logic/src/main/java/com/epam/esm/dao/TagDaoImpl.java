@@ -1,6 +1,8 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Tag;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -26,7 +28,13 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Tag getTagById(Long id) {
-        return jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
+        Tag tag;
+        try {
+            tag = jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
+        } catch (DataAccessException e){
+            throw new TagNotFoundException("Tag not found ", id);
+        }
+        return tag;
     }
 
     @Override

@@ -2,13 +2,14 @@ package com.epam.esm.controller;
 
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
-@Controller
+@RestController
+@RequestMapping(value = "/tags")
 public class TagController {
 
     private final TagService service;
@@ -17,29 +18,27 @@ public class TagController {
         this.service = service;
     }
 
-    @GetMapping(value = "/tags/{id}")
-    public @ResponseBody
-    Tag getTagById(@PathVariable Long id) {
+    @GetMapping(value = "/{id}")
+    public Tag getTagById(@PathVariable Long id) {
         return service.getTagById(id);
     }
 
-    @GetMapping(value = "/tags")
-    public @ResponseBody
-    List<Tag> getAllTags() {
+    @GetMapping(value = "/")
+    public List<Tag> getAllTags() {
         return service.getAllTags();
     }
 
-    @PostMapping(value = "/tags/{name}")
-    public @ResponseBody
-    Tag createTag(@PathVariable String name) {
+    @PostMapping(value = "/{name}")
+    public Tag createTag(@PathVariable String name) {
         Tag tag = new Tag(name);
         return service.createTag(tag);
     }
 
-    @DeleteMapping(value = "/tags/{id}")
+    @DeleteMapping(value = "/{id}")
     public @ResponseBody
-    void deleteTag(@PathVariable Long id) {
+    HttpStatus deleteTag(@PathVariable Long id) {
          service.deleteTag(id);
+        return HttpStatus.OK;
     }
 
 }
