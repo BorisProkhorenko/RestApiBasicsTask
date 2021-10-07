@@ -4,8 +4,7 @@ public class TagNotFoundException extends ApiException {
 
 
     public TagNotFoundException(String message, long id) {
-        super(message);
-        setAttribute("(id=" + id + ")");
+        super(message + "(id=" + id + ")");
     }
 
     public TagNotFoundException(String message) {

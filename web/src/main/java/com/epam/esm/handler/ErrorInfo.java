@@ -2,6 +2,7 @@ package com.epam.esm.handler;
 
 import org.springframework.http.HttpStatus;
 
+
 public class ErrorInfo {
 
     private HttpStatus httpStatus;
