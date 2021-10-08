@@ -2,6 +2,8 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Tag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Repository
 public class TagDaoImpl implements TagDao {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Tag> mapper;
@@ -31,7 +35,8 @@ public class TagDaoImpl implements TagDao {
         Tag tag;
         try {
             tag = jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new TagNotFoundException("Tag not found ", id);
         }
         return tag;

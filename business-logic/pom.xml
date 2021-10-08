@@ -30,7 +30,12 @@
         <artifactId>spring-jdbc-template</artifactId>
         <version>0.2.1</version>
     </dependency>
-
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>5.3.8</version>
+        <scope>test</scope>
+    </dependency>
 
 
 </dependencies>

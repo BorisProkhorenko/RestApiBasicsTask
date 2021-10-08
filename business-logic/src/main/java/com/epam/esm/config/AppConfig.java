@@ -7,7 +7,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 
-
 import javax.sql.DataSource;
 import java.util.Objects;
 
@@ -19,29 +18,38 @@ public class AppConfig {
     private final Environment environment;
     private final ApplicationContext context;
 
-    private static final String PROD_URL = "db.prod.url";
+    private static final String PROD_URL = "db.url";
     private static final String DEV_URL = "db.dev.url";
     private static final String LOGIN = "db.login";
     private static final String DRIVER = "db.driver";
     private static final String PASSWORD = "db.password";
     private static final String SIZE = "db.size";
 
+    private static final String TEST_DRIVER = "db.test.driver";
+    private static final String TEST_URL = "db.test.url";
 
-    public AppConfig(Environment environment, ApplicationContext context ) {
+
+    public AppConfig(Environment environment, ApplicationContext context) {
         this.environment = environment;
         this.context = context;
     }
 
     @Bean(name = "DataSource")
+    @Profile({"test"})
+    public DataSource test() {
+        return dataSource(TEST_URL, "", "", TEST_DRIVER);
+    }
+
+    @Bean(name = "DataSource")
     @Profile({"dev"})
     public DataSource dev() {
-        return dataSource(DEV_URL,LOGIN,PASSWORD,DRIVER);
+        return dataSource(DEV_URL, LOGIN, PASSWORD, DRIVER);
     }
 
     @Bean(name = "DataSource")
     @Profile({"prod", "default"})
     public DataSource prod() {
-        return dataSource(PROD_URL,LOGIN,PASSWORD,DRIVER);
+        return dataSource(PROD_URL, LOGIN, PASSWORD, DRIVER);
     }
 
     private DataSource dataSource(String url, String login, String password, String driver) {
@@ -55,12 +63,10 @@ public class AppConfig {
         return dataSource;
     }
 
-    @Bean
+    @Bean(name = "JdbcTemplate")
     JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(context.getBean(DataSource.class));
     }
-
-
 
 
 }

@@ -1,7 +1,6 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.filter.FilterType;
 import com.epam.esm.model.GiftCertificate;
 
 import org.springframework.stereotype.Service;
@@ -33,19 +32,19 @@ public class GiftCertificateService {
     public List<GiftCertificate> getCertificatesWithParams(Optional<String> tagId, Optional<String> part,
                                                            Optional<String> nameSort,
                                                            Optional<String> descriptionSort) {
-        Map<String, String> filters = new HashMap<>();
-        tagId.ifPresent(s -> filters.put(FilterType.FILTER_BY_TAG_ID.getFilterName(), s));
-        part.ifPresent(s -> filters.put(FilterType.FILTER_BY_PART.getFilterName(), s));
-        nameSort.ifPresent(s -> filters.put(FilterType.SORT_BY_NAME.getFilterName(), s));
-        descriptionSort.ifPresent(s -> filters.put(FilterType.SORT_BY_DESCRIPTION.getFilterName(), s));
-        return getCertificatesWithParams(filters);
+        Map<String, String> operations = new HashMap<>();
+        tagId.ifPresent(s -> operations.put(OperationType.FILTER_BY_TAG_ID.getOperationName(), s));
+        part.ifPresent(s -> operations.put(OperationType.FILTER_BY_PART.getOperationName(), s));
+        nameSort.ifPresent(s -> operations.put(OperationType.SORT_BY_NAME.getOperationName(), s));
+        descriptionSort.ifPresent(s -> operations.put(OperationType.SORT_BY_DESCRIPTION.getOperationName(), s));
+        return getCertificatesWithParams(operations);
     }
 
     private List<GiftCertificate> getCertificatesWithParams(Map<String, String> filters) {
         List<GiftCertificate> certificates = getAllCertificates();
         for (Map.Entry<String, String> entry : filters.entrySet()) {
-            FilterType type = FilterType.findFilterType(entry.getKey());
-            certificates = type.filter(certificates, entry.getValue());
+            OperationType type = OperationType.findOperationType(entry.getKey());
+            certificates = type.process(certificates, entry.getValue());
         }
 
         return certificates;
@@ -64,7 +63,7 @@ public class GiftCertificateService {
     }
 
     public GiftCertificate addTag(Long id, Long tagId) {
-      return  dao.addTag(id, tagId);
+        return dao.addTag(id, tagId);
     }
 
     public void removeTag(Long id, Long tagId) {
