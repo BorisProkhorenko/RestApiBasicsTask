@@ -64,7 +64,9 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
 
         while (resultSet.getLong(ID) == certificate.getId()) {
             Tag tag = tagRowMapper.mapRow(resultSet, i);
-            tags.add(tag);
+            if (tag.getId() != 0) {
+                tags.add(tag);
+            }
             if (resultSet.isLast()) {
                 break;
             }

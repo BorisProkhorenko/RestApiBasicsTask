@@ -35,7 +35,7 @@ public class AppConfig {
     }
 
     @Bean(name = "DataSource")
-    @Profile({"test"})
+    @Profile({"test", "default"})
     public DataSource test() {
         return dataSource(TEST_URL, "", "", TEST_DRIVER);
     }
@@ -47,7 +47,7 @@ public class AppConfig {
     }
 
     @Bean(name = "DataSource")
-    @Profile({"prod", "default"})
+    @Profile({"prod"})
     public DataSource prod() {
         return dataSource(PROD_URL, LOGIN, PASSWORD, DRIVER);
     }
@@ -67,6 +67,7 @@ public class AppConfig {
     JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(context.getBean(DataSource.class));
     }
+
 
 
 }

@@ -80,8 +80,9 @@ public class GiftCertificateController {
      * @param id - primary key to search {@link GiftCertificate} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
-    public void deleteCertificate(@PathVariable Long id) {
+    public HttpStatus deleteCertificate(@PathVariable Long id) {
         service.deleteCertificate(id);
+        return HttpStatus.OK;
     }
 
     /**
@@ -91,8 +92,9 @@ public class GiftCertificateController {
      * @param tagId - primary key to search {@link com.epam.esm.model.Tag} entity object in DB
      */
     @DeleteMapping(value = "/{id}/{tagId}")
-    public void removeTag(@PathVariable Long id, @PathVariable Long tagId) {
+    public HttpStatus removeTag(@PathVariable Long id, @PathVariable Long tagId) {
         service.removeTag(id, tagId);
+        return HttpStatus.OK;
     }
 
     /**
@@ -147,7 +149,7 @@ public class GiftCertificateController {
      * @return @return {@link List} of {@link GiftCertificate} entity objects from DB
      */
     @GetMapping(value = {"/params"})
-    public List<GiftCertificate> getCertificatesWithParams(@RequestParam("id") Optional<String> tagId,
+    public List<GiftCertificate> getCertificatesWithParams(@RequestParam("tagId") Optional<String> tagId,
                                                     @RequestParam("part") Optional<String> part,
                                                     @RequestParam("nameSort") Optional<String> nameSort,
                                                     @RequestParam("descriptionSort") Optional<String> descriptionSort) {

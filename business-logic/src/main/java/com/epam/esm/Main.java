@@ -5,11 +5,19 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.util.List;
+import java.util.Optional;
+
 public class Main {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+
         GiftCertificateService service = context.getBean(GiftCertificateService.class);
-        GiftCertificate certificate = service.getCertificateById(10L);
-        System.out.println(certificate);
+        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.of("3"),
+                Optional.empty(),Optional.empty(),Optional.empty());
+
+        for (GiftCertificate c:certificates) {
+            System.out.println(c);
+        }
     }
 }
