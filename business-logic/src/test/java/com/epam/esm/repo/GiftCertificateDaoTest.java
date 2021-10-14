@@ -1,5 +1,6 @@
 package com.epam.esm.repo;
 
+
 import com.epam.esm.config.AppConfig;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.TagDao;
@@ -8,86 +9,30 @@ import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.*;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Set;
 
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
-@ContextConfiguration(
-        classes = {AppConfig.class, GiftCertificateDao.class},
-        loader = AnnotationConfigContextLoader.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {AppConfig.class})
 @ActiveProfiles("test")
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 public class GiftCertificateDaoTest {
 
-    private final static String H2_CREATE_CERTIFICATE = "create table gift_certificate\n" +
-            "(\n" +
-            "    id               bigint NOT NULL AUTO_INCREMENT primary key,\n" +
-            "    name             varchar(255),\n" +
-            "    description      varchar(7000),\n" +
-            "    price            double,\n" +
-            "    duration         int,\n" +
-            "    create_date      timestamp DEFAULT CURRENT_TIMESTAMP,\n" +
-            "    last_update_date timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n" +
-            ")";
+    @Autowired
+    private GiftCertificateDao dao;
+    @Autowired
+    private TagDao tagDao;
 
-    private final static String H2_CREATE_TAG = "create table tag\n" +
-            "(\n" +
-            "    id            bigint NOT NULL AUTO_INCREMENT primary key,\n" +
-            "    name          varchar(255)\n" +
-            "\n" +
-            ")";
-
-    private final static String H2_CREATE_TAG_CERTIFICATE = "create table tag_gift_certificate\n" +
-            "(\n" +
-            "    id                        bigint NOT NULL AUTO_INCREMENT primary key,\n" +
-            "    tag_id                    bigint,\n" +
-            "    gift_certificate_id       bigint\n" +
-            "\n" +
-            ")";
-
-    private final static String H2_ADD_TAG_FOREIGN_KEY = "alter table tag_gift_certificate\n" +
-            "    add foreign key (tag_id) references tag (id) ON DELETE CASCADE";
-    private final static String H2_ADD_CERTIFICATE_FOREIGN_KEY = "alter table tag_gift_certificate\n" +
-            "    add foreign key(gift_certificate_id) references gift_certificate(id) ON DELETE CASCADE";
-
-    private final static String H2_DROP_TAG_CERTIFICATE ="drop table tag_gift_certificate";
-    private final static String H2_DROP_CERTIFICATE ="drop table gift_certificate";
-    private final static String H2_DROP_TAG ="drop table tag";
-
-
-    private static GiftCertificateDao dao;
-    private static TagDao tagDao;
-    private static JdbcTemplate jdbcTemplate;
-
-    @BeforeAll
-    public static void init() {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        jdbcTemplate = context.getBean(JdbcTemplate.class);
-        dao = context.getBean(GiftCertificateDao.class);
-        tagDao = context.getBean(TagDao.class);
-    }
-
-    @BeforeEach
-    public void before() {
-        jdbcTemplate.execute(H2_CREATE_CERTIFICATE);
-        jdbcTemplate.execute(H2_CREATE_TAG);
-        jdbcTemplate.execute(H2_CREATE_TAG_CERTIFICATE);
-        jdbcTemplate.execute(H2_ADD_TAG_FOREIGN_KEY);
-        jdbcTemplate.execute(H2_ADD_CERTIFICATE_FOREIGN_KEY);
-    }
-
-    @AfterEach
-    public void afterEach(){
-        jdbcTemplate.execute(H2_DROP_TAG_CERTIFICATE);
-        jdbcTemplate.execute(H2_DROP_CERTIFICATE);
-        jdbcTemplate.execute(H2_DROP_TAG);
-
-    }
 
     @Test
     public void testCreateAndGetByIdOk() {
@@ -127,7 +72,7 @@ public class GiftCertificateDaoTest {
     public void testCreateThenUpdateAndGetByIdOk() {
         //given
         GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        GiftCertificate updated = new GiftCertificate(1L,"updated", "description", 3, 5);
+        GiftCertificate updated = new GiftCertificate(1L, "updated", "description", 3, 5);
         //when
         dao.createCertificate(certificate);
         dao.updateCertificate(updated);
@@ -157,7 +102,7 @@ public class GiftCertificateDaoTest {
         //when
         dao.createCertificate(certificate);
         tagDao.createTag(tag);
-        dao.addTag(1L,1L);
+        dao.addTag(1L, 1L);
         GiftCertificate certificateFromDb = dao.getCertificateById(1L);
         Set<Tag> tags = certificateFromDb.getTags();
         //then
@@ -171,14 +116,14 @@ public class GiftCertificateDaoTest {
         dao.createCertificate(certificate);
         //then
         Assertions.assertThrows(TagNotFoundException.class, () ->
-                dao.addTag(1L,1L));
+                dao.addTag(1L, 1L));
     }
 
     @Test
     public void testCreateAddTagGetCertificateNotFoundException() {
         //given
         Tag tag = new Tag("TagName");
-       tagDao.createTag(tag);
+        tagDao.createTag(tag);
         //then
         Assertions.assertThrows(CertificateNotFoundException.class, () ->
                 dao.addTag(1L, 1L));
@@ -192,8 +137,8 @@ public class GiftCertificateDaoTest {
         //when
         dao.createCertificate(certificate);
         tagDao.createTag(tag);
-        dao.addTag(1L,1L);
-        dao.removeTag(1L,1L);
+        dao.addTag(1L, 1L);
+        dao.removeTag(1L, 1L);
         GiftCertificate certificateFromDb = dao.getCertificateById(1L);
         Set<Tag> tags = certificateFromDb.getTags();
         //then

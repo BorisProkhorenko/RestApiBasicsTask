@@ -66,10 +66,8 @@ public class TagController {
      * @param id - primary key to search {@link Tag} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
-    public @ResponseBody
-    HttpStatus deleteTag(@PathVariable Long id) {
+    public void deleteTag(@PathVariable Long id) {
         service.deleteTag(id);
-        return HttpStatus.OK;
     }
 
 }

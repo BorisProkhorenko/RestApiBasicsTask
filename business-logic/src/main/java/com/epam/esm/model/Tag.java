@@ -1,10 +1,13 @@
 package com.epam.esm.model;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class Tag {
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;
     private String name;
 

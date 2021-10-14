@@ -80,9 +80,8 @@ public class GiftCertificateController {
      * @param id - primary key to search {@link GiftCertificate} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
-    public HttpStatus deleteCertificate(@PathVariable Long id) {
+    public void deleteCertificate(@PathVariable Long id) {
         service.deleteCertificate(id);
-        return HttpStatus.OK;
     }
 
     /**
@@ -92,9 +91,8 @@ public class GiftCertificateController {
      * @param tagId - primary key to search {@link com.epam.esm.model.Tag} entity object in DB
      */
     @DeleteMapping(value = "/{id}/{tagId}")
-    public HttpStatus removeTag(@PathVariable Long id, @PathVariable Long tagId) {
+    public void removeTag(@PathVariable Long id, @PathVariable Long tagId) {
         service.removeTag(id, tagId);
-        return HttpStatus.OK;
     }
 
     /**

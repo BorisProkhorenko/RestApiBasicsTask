@@ -50,28 +50,34 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
         return mapTags(certificate, resultSet, i);
     }
 
+    private String toISOFormatDate(Date date) {
+        TimeZone tz = TimeZone.getTimeZone(UTC_TIMEZONE);
+        DateFormat df = new SimpleDateFormat(DATE_PATTERN);
+        df.setTimeZone(tz);
+        return df.format(date);
+    }
+
     private GiftCertificate mapTags(GiftCertificate certificate, ResultSet resultSet, int i) throws SQLException {
         Set<Tag> tags = new HashSet<>();
         if (resultSet.isLast()) {
-            Tag tag = tagRowMapper.mapRow(resultSet, i);
-            if (tag.getId() != 0) {
-                tags.add(tag);
-            }
-
+            mapTag(tags, resultSet, i);
             certificate.setTags(tags);
             return certificate;
         }
 
-        while (resultSet.getLong(ID) == certificate.getId()) {
-            Tag tag = tagRowMapper.mapRow(resultSet, i);
-            if (tag.getId() != 0) {
-                tags.add(tag);
-            }
-            if (resultSet.isLast()) {
-                break;
-            }
-            resultSet.next();
+        return addTagsToCertificate(tags, certificate, resultSet, i);
+    }
+
+    private void mapTag(Set<Tag> tags, ResultSet resultSet, int i) throws SQLException {
+        Tag tag = tagRowMapper.mapRow(resultSet, i);
+        if (tag.getId() != 0) {
+            tags.add(tag);
         }
+    }
+
+    private GiftCertificate addTagsToCertificate(Set<Tag> tags, GiftCertificate certificate, ResultSet resultSet, int i)
+            throws SQLException {
+        mapTagsFromResultSet(tags, certificate, resultSet, i);
         certificate.setTags(tags);
 
         if (resultSet.TYPE_SCROLL_INSENSITIVE == resultSet.getType()) {
@@ -80,10 +86,16 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
         return certificate;
     }
 
-    private String toISOFormatDate(Date date) {
-        TimeZone tz = TimeZone.getTimeZone(UTC_TIMEZONE);
-        DateFormat df = new SimpleDateFormat(DATE_PATTERN);
-        df.setTimeZone(tz);
-        return df.format(date);
+    private void mapTagsFromResultSet(Set<Tag> tags, GiftCertificate certificate, ResultSet resultSet, int i)
+            throws SQLException {
+        while (resultSet.getLong(ID) == certificate.getId()) {
+            mapTag(tags, resultSet, i);
+            if (resultSet.isLast()) {
+                break;
+            }
+            resultSet.next();
+        }
     }
+
+
 }

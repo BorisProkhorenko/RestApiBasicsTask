@@ -1,19 +1,25 @@
 package com.epam.esm.model;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 public class GiftCertificate {
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;
     private String name;
     private String description;
     private double price;
     private int duration;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String createDate;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String lastUpdateDate;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Set<Tag> tags = new HashSet<>();
 
     public GiftCertificate() {

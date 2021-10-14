@@ -27,7 +27,6 @@ public class RestResponseEntityExceptionHandler
     @ExceptionHandler({CertificateNotFoundException.class})
     public ResponseEntity<ErrorInfo> handleCertificateNotFoundException(CertificateNotFoundException exception) {
         ErrorInfo info = new ErrorInfo(
-                HttpStatus.NOT_FOUND,
                 CERTIFICATE_NOT_FOUND_ERROR_CODE,
                 exception.getMessage()
         );
@@ -37,7 +36,6 @@ public class RestResponseEntityExceptionHandler
     @ExceptionHandler({TagNotFoundException.class})
     public ResponseEntity<ErrorInfo> handleTagNotFoundException(TagNotFoundException exception) {
         ErrorInfo info =  new ErrorInfo(
-                HttpStatus.NOT_FOUND,
                 TAG_NOT_FOUND_ERROR_CODE,
                 exception.getMessage()
         );
@@ -47,7 +45,6 @@ public class RestResponseEntityExceptionHandler
     @ExceptionHandler({TagAlreadyAssociatedException.class})
     public ResponseEntity<ErrorInfo> handleTagNotFoundException(TagAlreadyAssociatedException exception) {
         ErrorInfo info = new ErrorInfo(
-                HttpStatus.CONFLICT,
                 TAG_ASSOCIATED_ERROR_CODE,
                 exception.getMessage()
         );
@@ -57,7 +54,6 @@ public class RestResponseEntityExceptionHandler
     @ExceptionHandler({InvalidRequestException.class})
     public ResponseEntity<ErrorInfo> handleInvalidRequestException(InvalidRequestException exception) {
         ErrorInfo info = new ErrorInfo(
-                HttpStatus.BAD_REQUEST,
                 INVALID_REQUEST_ERROR_CODE,
                 exception.getMessage()
         );
