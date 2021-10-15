@@ -37,7 +37,7 @@ public class TagDaoImpl implements TagDao {
             tag = jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
         } catch (DataAccessException e) {
             LOGGER.error(e.getMessage(), e);
-            throw new TagNotFoundException("Tag not found ", id);
+            throw new TagNotFoundException(id);
         }
         return tag;
     }

@@ -63,7 +63,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
             certificate = jdbcTemplate.queryForObject(SQL_FIND_CERTIFICATE, new Object[]{id}, mapper);
         } catch (DataAccessException e) {
             LOGGER.error(e.getMessage(), e);
-            throw new CertificateNotFoundException("Certificate not found ", id);
+            throw new CertificateNotFoundException(id);
         }
         return certificate;
     }
@@ -108,7 +108,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
         tagDao.getTagById(tagId);
         boolean isTagAssociated = certificate.getTags().stream().anyMatch(t -> t.getId() == tagId);
         if (isTagAssociated) {
-            throw new TagAlreadyAssociatedException("Tag is already associated with this certificate", id, tagId);
+            throw new TagAlreadyAssociatedException( id, tagId);
         }
         jdbcTemplate.update(SQL_INSERT_TAG_CERTIFICATE,
                 tagId, id);
