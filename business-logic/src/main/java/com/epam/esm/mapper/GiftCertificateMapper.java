@@ -59,13 +59,22 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
 
     private GiftCertificate mapTags(GiftCertificate certificate, ResultSet resultSet, int i) throws SQLException {
         Set<Tag> tags = new HashSet<>();
+
         if (resultSet.isLast()) {
             mapTag(tags, resultSet, i);
             certificate.setTags(tags);
             return certificate;
         }
 
-        return addTagsToCertificate(tags, certificate, resultSet, i);
+        mapTagsFromResultSet(tags, certificate, resultSet, i);
+        certificate.setTags(tags);
+
+        if (resultSet.TYPE_SCROLL_INSENSITIVE == resultSet.getType()
+                && resultSet.getLong(ID) != certificate.getId()) {
+            resultSet.previous();
+        }
+
+        return certificate;
     }
 
     private void mapTag(Set<Tag> tags, ResultSet resultSet, int i) throws SQLException {
@@ -75,16 +84,6 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
         }
     }
 
-    private GiftCertificate addTagsToCertificate(Set<Tag> tags, GiftCertificate certificate, ResultSet resultSet, int i)
-            throws SQLException {
-        mapTagsFromResultSet(tags, certificate, resultSet, i);
-        certificate.setTags(tags);
-
-        if (resultSet.TYPE_SCROLL_INSENSITIVE == resultSet.getType()) {
-            resultSet.previous();
-        }
-        return certificate;
-    }
 
     private void mapTagsFromResultSet(Set<Tag> tags, GiftCertificate certificate, ResultSet resultSet, int i)
             throws SQLException {

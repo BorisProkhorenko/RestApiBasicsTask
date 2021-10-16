@@ -5,6 +5,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 import javax.sql.DataSource;
@@ -13,6 +16,7 @@ import java.util.Objects;
 @Configuration
 @ComponentScan("com.epam.esm")
 @PropertySource("classpath:db.properties")
+@EnableTransactionManagement
 public class AppConfig {
 
     private final Environment environment;
@@ -68,6 +72,12 @@ public class AppConfig {
         return new JdbcTemplate(context.getBean(DataSource.class));
     }
 
+    @Bean(name = "transactionManager")
+    public PlatformTransactionManager transactionManager() {
+        DataSourceTransactionManager manager = new DataSourceTransactionManager();
+        manager.setDataSource(context.getBean(DataSource.class));
+        return manager;
+    }
 
 
 }

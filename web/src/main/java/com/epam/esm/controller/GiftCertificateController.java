@@ -1,13 +1,10 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +14,12 @@ import java.util.Optional;
 /**
  * This Controller provides public API for operations with {@link GiftCertificate} entity.
  * Uses {@link GiftCertificateService} to access Data Base through business-logic layer.
- * Uses {@link ObjectMapper} to map objects from {@link JsonPatch}
+ * Uses {@link ObjectMapper} to map objects from JSON
  *
  * @author Boris Prokhorenko
  * @see GiftCertificateService
  * @see GiftCertificate
  * @see ObjectMapper
- * @see JsonPatch
  */
 @RestController
 @RequestMapping(value = "/certificates")
@@ -38,7 +34,7 @@ public class GiftCertificateController {
     }
 
     /**
-     *Method allows getting {@link GiftCertificate} from DB by its id
+     * Method allows getting {@link GiftCertificate} from DB by its id
      *
      * @param id - primary key to search {@link GiftCertificate} entity object in DB
      * @return {@link GiftCertificate} entity object from DB
@@ -49,11 +45,11 @@ public class GiftCertificateController {
     }
 
     /**
-     *Method allows getting all {@link GiftCertificate} entity objects from DB
+     * Method allows getting all {@link GiftCertificate} entity objects from DB
      *
      * @return {@link List} of {@link GiftCertificate} entity objects from DB
      */
-    @GetMapping(value = "/")
+    @GetMapping
     public List<GiftCertificate> getAllCertificates() {
         return service.getAllCertificates();
     }
@@ -61,17 +57,21 @@ public class GiftCertificateController {
     /**
      * Method allows creating a new {@link GiftCertificate} entity object in DB
      *
-     * @param name - name field of {@link GiftCertificate}
-     * @param description - description field of {@link GiftCertificate}
-     * @param price - price field of {@link GiftCertificate}
-     * @param duration - duration field of {@link GiftCertificate}
+     * @param json - tag object to map from request body
      * @return {@link GiftCertificate} object, which you created
      */
-    @PostMapping(value = "/{name}/{description}/{price}/{duration}")
-    public GiftCertificate createCertificate(@PathVariable String name, @PathVariable String description,
-                                      @PathVariable double price, @PathVariable int duration) {
-        GiftCertificate certificate = new GiftCertificate(name, description, price, duration);
-        return service.createCertificate(certificate);
+    @PostMapping
+    public GiftCertificate createCertificate(@RequestBody String json) {
+        try {
+            GiftCertificate certificate = objectMapper.readValue(json, GiftCertificate.class);
+            if (certificate.getName() == null || certificate.getDescription() == null
+                    || certificate.getPrice() == null || certificate.getDuration() == null) {
+                throw new InvalidRequestException("Empty field");
+            }
+            return service.createCertificate(certificate);
+        } catch (JsonProcessingException e) {
+            throw new InvalidRequestException(e.getMessage());
+        }
     }
 
     /**
@@ -84,73 +84,42 @@ public class GiftCertificateController {
         service.deleteCertificate(id);
     }
 
-    /**
-     * Method allows removing {@link com.epam.esm.model.Tag} from {@link GiftCertificate} from DB by theirs id
-     *
-     * @param id - primary key to search {@link GiftCertificate} entity object in DB
-     * @param tagId - primary key to search {@link com.epam.esm.model.Tag} entity object in DB
-     */
-    @DeleteMapping(value = "/{id}/{tagId}")
-    public void removeTag(@PathVariable Long id, @PathVariable Long tagId) {
-        service.removeTag(id, tagId);
-    }
-
-    /**
-     * Method allows adding {@link com.epam.esm.model.Tag} to {@link GiftCertificate} in DB by theirs id
-     *
-     * @param id - primary key to search {@link GiftCertificate} entity object in DB
-     * @param tagId - primary key to search {@link com.epam.esm.model.Tag} entity object in DB
-     */
-    @PostMapping(value = "/{id}/{tagId}")
-    public GiftCertificate addTag(@PathVariable Long id, @PathVariable Long tagId) {
-      return service.addTag(id, tagId);
-    }
 
     /**
      * Method allows updating {@link GiftCertificate} info in DB by its id
      *
-     * @param id - primary key to search {@link GiftCertificate} entity object in DB
-     * @param patch - {@link JsonPatch} from PATCH Http method body which represents
-     *              which fields will be updated
+     * @param json - tag object to map from request body
      * @return {@link ResponseEntity} ok if update succeeded and INTERNAL_SERVER_ERROR if not
      */
-    @PatchMapping(path = "/{id}", consumes = "application/json-patch+json")
-    public ResponseEntity<GiftCertificate> updateCustomer(@PathVariable long id,
-                                                          @RequestBody JsonPatch patch) {
+    @PutMapping(consumes = "application/json")
+    public GiftCertificate updateCustomer(@RequestBody String json) {
         try {
-            GiftCertificate certificate = service.getCertificateById(id);
-            GiftCertificate certificatePatched = applyPatchToCustomer(patch, certificate);
-            service.updateCertificate(certificatePatched);
-
-            return ResponseEntity.ok(certificatePatched);
-        } catch (JsonPatchException | JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            GiftCertificate certificate = objectMapper.readValue(json, GiftCertificate.class);
+            if (certificate.getId() == 0) {
+                throw new InvalidRequestException("id = 0");
+            }
+            return service.updateCertificate(certificate);
+        } catch (JsonProcessingException e) {
+            throw new InvalidRequestException(e.getMessage());
         }
-    }
-
-
-    private GiftCertificate applyPatchToCustomer(
-            JsonPatch patch, GiftCertificate certificate) throws JsonPatchException, JsonProcessingException {
-        JsonNode patched = patch.apply(objectMapper.convertValue(certificate, JsonNode.class));
-        return objectMapper.treeToValue(patched, GiftCertificate.class);
     }
 
     /**
      * Method allows getting {@link GiftCertificate} objects from db filtered and/or sorted
      *
-     * @param tagId - if presents filtering by tag id will be applied
-     * @param part - if presents filtering by part of name and description will be applied
-     * @param nameSort - if presents sorting(ASC/DESC) by name will be applied. If nameSort param
-     *                 is different from "asc" or "desc" in ignored case sort will not be applied.
+     * @param tagId            - if presents filtering by tag id will be applied
+     * @param part             - if presents filtering by part of name and description will be applied
+     * @param nameSort         - if presents sorting(ASC/DESC) by name will be applied. If nameSort param
+     *                         is different from "asc" or "desc" in ignored case sort will not be applied.
      * @param descriptionSort- if presents sorting(ASC/DESC) by name will be applied. If nameSort param
-     *      *                 is different from "asc" or "desc" in ignored case sort will not be applied.
+     *                         *                 is different from "asc" or "desc" in ignored case sort will not be applied.
      * @return @return {@link List} of {@link GiftCertificate} entity objects from DB
      */
     @GetMapping(value = {"/params"})
     public List<GiftCertificate> getCertificatesWithParams(@RequestParam("tagId") Optional<String> tagId,
-                                                    @RequestParam("part") Optional<String> part,
-                                                    @RequestParam("nameSort") Optional<String> nameSort,
-                                                    @RequestParam("descriptionSort") Optional<String> descriptionSort) {
+                                                           @RequestParam("part") Optional<String> part,
+                                                           @RequestParam("nameSort") Optional<String> nameSort,
+                                                           @RequestParam("descriptionSort") Optional<String> descriptionSort) {
         return service.getCertificatesWithParams(tagId, part,
                 nameSort, descriptionSort);
     }

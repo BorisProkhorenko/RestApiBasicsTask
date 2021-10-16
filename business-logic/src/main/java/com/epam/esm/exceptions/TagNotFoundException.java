@@ -7,4 +7,8 @@ public class TagNotFoundException extends ApiException {
         super("(id=" + id + ")");
     }
 
+    public TagNotFoundException( String name) {
+        super("(name=" + name + ")");
+    }
+
 }

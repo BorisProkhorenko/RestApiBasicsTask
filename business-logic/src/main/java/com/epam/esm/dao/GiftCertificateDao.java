@@ -18,9 +18,7 @@ public interface GiftCertificateDao {
 
     GiftCertificate createCertificate(GiftCertificate certificate);
 
-    GiftCertificate addTag(Long id, Long tagId);
 
-    void removeTag(Long id, Long tagId);
 
 
 }

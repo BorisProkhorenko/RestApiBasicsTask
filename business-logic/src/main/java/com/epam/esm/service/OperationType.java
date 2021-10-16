@@ -22,7 +22,7 @@ public enum OperationType {
                         .collect(Collectors.toList());
             } catch (NumberFormatException e) {
                 LOGGER.error(e.getMessage(), e);
-                throw new InvalidRequestException("(id)");
+                throw new InvalidRequestException("id");
             }
 
         }
@@ -86,6 +86,6 @@ public enum OperationType {
                     .collect(Collectors.toList());
         }
 
-        throw new InvalidRequestException("(sort parameters)");
+        throw new InvalidRequestException("sort parameters");
     }
 }

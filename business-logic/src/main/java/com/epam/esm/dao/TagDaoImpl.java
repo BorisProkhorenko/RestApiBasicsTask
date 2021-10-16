@@ -20,6 +20,7 @@ public class TagDaoImpl implements TagDao {
     private final RowMapper<Tag> mapper;
 
     private final static String SQL_FIND_TAG = "select id as tag_id, name as tag_name from tag where id = ?";
+    private final static String SQL_FIND_TAG_BY_NAME = "select id as tag_id, name as tag_name from tag where name = ?";
     private final static String SQL_DELETE_TAG = "delete from tag where id = ?";
     private final static String SQL_GET_ALL = "select id as tag_id, name as tag_name from tag";
     private final static String SQL_INSERT_TAG = "insert into tag(name) values(?)";
@@ -32,14 +33,24 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Tag getTagById(Long id) {
-        Tag tag;
         try {
-            tag = jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
+            return jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
         } catch (DataAccessException e) {
             LOGGER.error(e.getMessage(), e);
             throw new TagNotFoundException(id);
         }
-        return tag;
+
+    }
+
+    @Override
+    public Tag getTagByName(String name) {
+        try {
+            return jdbcTemplate.queryForObject(SQL_FIND_TAG_BY_NAME, new Object[]{name}, mapper);
+        } catch (DataAccessException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new TagNotFoundException(name);
+        }
+
     }
 
     @Override
@@ -55,7 +66,11 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Tag createTag(Tag tag) {
-        jdbcTemplate.update(SQL_INSERT_TAG, tag.getName());
+        try {
+            getTagByName(tag.getName());
+        } catch (TagNotFoundException ex) {
+            jdbcTemplate.update(SQL_INSERT_TAG, tag.getName());
+        }
         return tag;
     }
 

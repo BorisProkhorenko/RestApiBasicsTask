@@ -8,6 +8,8 @@ public interface TagDao {
 
     Tag getTagById(Long id);
 
+    Tag getTagByName(String name);
+
     List<Tag> getAllTags();
 
     void deleteTagById(Long id);

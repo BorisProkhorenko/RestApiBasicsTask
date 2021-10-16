@@ -62,12 +62,6 @@ public class GiftCertificateService {
         return dao.createCertificate(certificate);
     }
 
-    public GiftCertificate addTag(Long id, Long tagId) {
-        return dao.addTag(id, tagId);
-    }
 
-    public void removeTag(Long id, Long tagId) {
-        dao.removeTag(id, tagId);
-    }
 
 }

@@ -11,16 +11,20 @@ public class GiftCertificate {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String name;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
-    private double price;
-    private int duration;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Double price;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer duration;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String createDate;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String lastUpdateDate;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<Tag> tags = new HashSet<>();
+    private Set<Tag> tags;
 
     public GiftCertificate() {
     }
@@ -67,19 +71,19 @@ public class GiftCertificate {
         this.description = description;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public int getDuration() {
+    public Integer getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 

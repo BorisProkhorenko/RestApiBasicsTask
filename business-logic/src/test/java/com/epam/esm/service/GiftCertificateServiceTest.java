@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -34,12 +32,16 @@ public class GiftCertificateServiceTest {
                 .thenReturn(MOCK_CERTIFICATE);
         when(mockDao.updateCertificate(any()))
                 .thenReturn(MOCK_CERTIFICATE);
-        when(mockDao.addTag(anyLong(), anyLong()))
-                .thenReturn(MOCK_CERTIFICATE);
         GiftCertificate certificate1 = new GiftCertificate("name", "description", 4, 4);
         Tag tag = new Tag(1L, "tag");
-        certificate1.getTags().add(tag);
+        Set<Tag> tagSet = new HashSet<>();
+        tagSet.add(tag);
+        certificate1.setTags(tagSet);
+        Set<Tag> emptySet = new HashSet<>();
+        MOCK_CERTIFICATE.setTags(emptySet);
         GiftCertificate certificate2 = new GiftCertificate("test", "test", 4, 4);
+        certificate2.setTags(emptySet);
+
         List<GiftCertificate> certificates = Arrays.asList(MOCK_CERTIFICATE, certificate2, certificate1);
         when(mockDao.getAllCertificates())
                 .thenReturn(certificates);
@@ -81,13 +83,6 @@ public class GiftCertificateServiceTest {
         Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
     }
 
-    @Test
-    public void testAddTag() {
-        //when
-        GiftCertificate certificate = service.addTag(1L, 1L);
-        //then
-        Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
-    }
 
     @Test
     public void testGetWithParamsWhenFilteredByTag() {
@@ -99,7 +94,7 @@ public class GiftCertificateServiceTest {
     }
 
     @Test
-    public void testGetWithParamsWhenFilteredByNoyExistedTag() {
+    public void testGetWithParamsWhenFilteredByNoExistedTag() {
         //when
         List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.of("2"), Optional.empty(),
                 Optional.empty(), Optional.empty());

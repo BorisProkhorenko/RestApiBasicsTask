@@ -3,9 +3,7 @@ package com.epam.esm.repo;
 
 import com.epam.esm.config.AppConfig;
 import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.dao.TagDao;
 import com.epam.esm.exceptions.CertificateNotFoundException;
-import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.*;
@@ -17,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,8 +29,6 @@ public class GiftCertificateDaoTest {
 
     @Autowired
     private GiftCertificateDao dao;
-    @Autowired
-    private TagDao tagDao;
 
 
     @Test
@@ -72,13 +69,14 @@ public class GiftCertificateDaoTest {
     public void testCreateThenUpdateAndGetByIdOk() {
         //given
         GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        GiftCertificate updated = new GiftCertificate(1L, "updated", "description", 3, 5);
+        GiftCertificate updated = new GiftCertificate(1L, "updated", null, 3, 5);
         //when
         dao.createCertificate(certificate);
         dao.updateCertificate(updated);
         GiftCertificate certificateFromDb = dao.getCertificateById(1L);
         //then
         Assertions.assertEquals("updated", certificateFromDb.getName());
+        Assertions.assertEquals("description", certificateFromDb.getDescription());
     }
 
     @Test
@@ -93,57 +91,41 @@ public class GiftCertificateDaoTest {
                 dao.updateCertificate(updated));
     }
 
-
     @Test
-    public void testCreateAddTagGetOk() {
+    public void testCreateWithTagsGetByIdOk() {
         //given
         GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        Tag tag = new Tag("TagName");
+        Set<com.epam.esm.model.Tag> tags = new HashSet<>();
+        tags.add(new Tag("tag"));
+        certificate.setTags(tags);
         //when
         dao.createCertificate(certificate);
-        tagDao.createTag(tag);
-        dao.addTag(1L, 1L);
-        GiftCertificate certificateFromDb = dao.getCertificateById(1L);
-        Set<Tag> tags = certificateFromDb.getTags();
+        GiftCertificate certificateFromDB = dao.getCertificateById(1L);
         //then
-        Assertions.assertEquals(1, tags.size());
+        Assertions.assertEquals(1, certificateFromDB.getTags().size());
     }
 
     @Test
-    public void testCreateAddTagGetTagNotFoundException() {
+    public void testCreateAndUpdateWithTagsGetByIdOk() {
         //given
         GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        dao.createCertificate(certificate);
-        //then
-        Assertions.assertThrows(TagNotFoundException.class, () ->
-                dao.addTag(1L, 1L));
-    }
-
-    @Test
-    public void testCreateAddTagGetCertificateNotFoundException() {
-        //given
-        Tag tag = new Tag("TagName");
-        tagDao.createTag(tag);
-        //then
-        Assertions.assertThrows(CertificateNotFoundException.class, () ->
-                dao.addTag(1L, 1L));
-    }
-
-    @Test
-    public void testCreateAddTagDeleteGetOk() {
-        //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        Tag tag = new Tag("TagName");
+        GiftCertificate updated = new GiftCertificate(1L,"updated", "updated", 3, 5);
+        Set<com.epam.esm.model.Tag> tags = new HashSet<>();
+        Set<com.epam.esm.model.Tag> tagsUpdated = new HashSet<>();
+        tags.add(new Tag("tag"));
+        tagsUpdated.add(new Tag("tag1"));
+        tagsUpdated.add(new Tag("tag2"));
+        certificate.setTags(tags);
+        updated.setTags(tagsUpdated);
         //when
         dao.createCertificate(certificate);
-        tagDao.createTag(tag);
-        dao.addTag(1L, 1L);
-        dao.removeTag(1L, 1L);
-        GiftCertificate certificateFromDb = dao.getCertificateById(1L);
-        Set<Tag> tags = certificateFromDb.getTags();
+        dao.updateCertificate(updated);
+        GiftCertificate certificateFromDB = dao.getCertificateById(1L);
         //then
-        Assertions.assertEquals(0, tags.size());
+        Assertions.assertEquals(2, certificateFromDB.getTags().size());
     }
+
+
 
 
 }
