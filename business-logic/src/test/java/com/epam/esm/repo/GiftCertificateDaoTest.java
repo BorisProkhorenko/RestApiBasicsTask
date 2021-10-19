@@ -1,19 +1,23 @@
 package com.epam.esm.repo;
 
 
-import com.epam.esm.config.AppConfig;
+import com.epam.esm.config.RepoApplication;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.exceptions.CertificateNotFoundException;
+
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+
 
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,10 +26,13 @@ import java.util.Set;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AppConfig.class})
+@SpringBootTest()
 @ActiveProfiles("test")
+@ContextConfiguration(classes = {RepoApplication.class})
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 public class GiftCertificateDaoTest {
+
+
 
     @Autowired
     private GiftCertificateDao dao;
@@ -124,6 +131,8 @@ public class GiftCertificateDaoTest {
         //then
         Assertions.assertEquals(2, certificateFromDB.getTags().size());
     }
+
+
 
 
 

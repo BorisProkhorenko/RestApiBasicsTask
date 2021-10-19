@@ -3,7 +3,6 @@ package com.epam.esm.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
