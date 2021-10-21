@@ -15,8 +15,9 @@ import org.springframework.test.annotation.DirtiesContext;
 
 
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.HashSet;
@@ -26,13 +27,13 @@ import java.util.Set;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest()
+@SpringBootTest(classes = RepoApplication.class)
 @ActiveProfiles("test")
-@ContextConfiguration(classes = {RepoApplication.class})
+@TestPropertySource(
+        locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@Transactional
 public class GiftCertificateDaoTest {
-
-
 
     @Autowired
     private GiftCertificateDao dao;
@@ -66,7 +67,8 @@ public class GiftCertificateDaoTest {
         GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
         //when
         dao.createCertificate(certificate);
-        dao.deleteCertificateById(1L);
+        certificate.setId(1L);
+        dao.deleteCertificate(certificate);
         //then
         Assertions.assertThrows(CertificateNotFoundException.class, () ->
                 dao.getCertificateById(1L));
@@ -126,6 +128,7 @@ public class GiftCertificateDaoTest {
         updated.setTags(tagsUpdated);
         //when
         dao.createCertificate(certificate);
+        System.out.println(dao.getAllCertificates());
         dao.updateCertificate(updated);
         GiftCertificate certificateFromDB = dao.getCertificateById(1L);
         //then

@@ -55,11 +55,10 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public GiftCertificate updateCertificate(GiftCertificate certificate) {
-        EntityManager manager = getCurrentSession().getEntityManagerFactory().createEntityManager();
-        GiftCertificate certificateFromDb = manager.find(GiftCertificate.class, certificate.getId());
-        certificateFromDb = mapFields(certificate, certificateFromDb);
+        GiftCertificate certificateFromDb = getCertificateById(certificate.getId());
+        certificate = mapFields(certificate, certificateFromDb);
 
-        return (GiftCertificate) getCurrentSession().merge(certificateFromDb);
+        return (GiftCertificate) getCurrentSession().merge(certificate);
     }
 
     private GiftCertificate mapFields(GiftCertificate newCert, GiftCertificate certificateFromDb) {

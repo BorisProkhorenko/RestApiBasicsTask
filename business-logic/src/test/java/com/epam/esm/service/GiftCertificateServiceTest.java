@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.config.RepoApplication;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.GiftCertificate;
@@ -17,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(classes = RepoApplication.class)
 public class GiftCertificateServiceTest {
 
     private static GiftCertificateService service;
@@ -214,4 +215,6 @@ public class GiftCertificateServiceTest {
                         Optional.empty(), Optional.empty()));
 
     }
+
+
 }

@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.config.RepoApplication;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(classes = RepoApplication.class)
 public class TagServiceTest {
 
 
@@ -60,4 +61,6 @@ public class TagServiceTest {
         //then
         Assertions.assertEquals(tag.getName(), MOCK);
     }
+
+
 }
