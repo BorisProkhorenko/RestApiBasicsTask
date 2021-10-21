@@ -14,36 +14,28 @@ import java.util.Set;
 @Table(name = "gift_certificate")
 public class GiftCertificate {
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String name;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double price;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer duration;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "create_date")
     private Date createDate;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update_date")
     private Date lastUpdateDate;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(name = "tag_gift_certificate", joinColumns = @JoinColumn(name = "gift_certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
@@ -68,6 +60,16 @@ public class GiftCertificate {
         this.description = description;
         this.price = price;
         this.duration = duration;
+    }
+
+    public GiftCertificate(long id, String name, String description,
+                           double price, int duration, Set<Tag> tags) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
+        this.tags = tags;
     }
 
     public long getId() {

@@ -39,12 +39,6 @@ public class RepoApplication {
     @Autowired
     private Environment env;
 
-/*
-    @Autowired
-    private GiftCertificateDao dao;
-
- */
-
 
 
     public static void main(String[] args) {

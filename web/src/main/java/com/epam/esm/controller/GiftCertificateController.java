@@ -1,5 +1,7 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.GiftCertificateDtoMapper;
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This Controller provides public API for operations with {@link GiftCertificate} entity.
@@ -27,48 +30,55 @@ public class GiftCertificateController {
 
     private final GiftCertificateService service;
     private final ObjectMapper objectMapper;
+    private final GiftCertificateDtoMapper dtoMapper;
 
-    public GiftCertificateController(GiftCertificateService service, ObjectMapper objectMapper) {
+    public GiftCertificateController(GiftCertificateService service, ObjectMapper objectMapper,
+                                     GiftCertificateDtoMapper dtoMapper) {
         this.service = service;
         this.objectMapper = objectMapper;
+        this.dtoMapper = dtoMapper;
     }
 
     /**
      * Method allows getting {@link GiftCertificate} from DB by its id
      *
      * @param id - primary key to search {@link GiftCertificate} entity object in DB
-     * @return {@link GiftCertificate} entity object from DB
+     * @return {@link GiftCertificateDto} DTO of entity object from DB
      */
     @GetMapping(value = "/{id}")
-    public GiftCertificate getCertificateById(@PathVariable Long id) {
-        return service.getCertificateById(id);
+    public GiftCertificateDto getCertificateById(@PathVariable Long id) {
+
+        return dtoMapper.toDto(service.getCertificateById(id));
     }
 
     /**
      * Method allows getting all {@link GiftCertificate} entity objects from DB
      *
-     * @return {@link List} of {@link GiftCertificate} entity objects from DB
+     * @return {@link List} of {@link GiftCertificateDto} DTO of entity objects from DB
      */
     @GetMapping
-    public List<GiftCertificate> getAllCertificates() {
-        return service.getAllCertificates();
+    public List<GiftCertificateDto> getAllCertificates() {
+        return service.getAllCertificates()
+                .stream()
+                .map(dtoMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     /**
      * Method allows creating a new {@link GiftCertificate} entity object in DB
      *
      * @param json - tag object to map from request body
-     * @return {@link GiftCertificate} object, which you created
+     * @return {@link GiftCertificateDto} DTO of object, which you created
      */
     @PostMapping
-    public GiftCertificate createCertificate(@RequestBody String json) {
+    public GiftCertificateDto createCertificate(@RequestBody String json) {
         try {
             GiftCertificate certificate = objectMapper.readValue(json, GiftCertificate.class);
             if (certificate.getName() == null || certificate.getDescription() == null
                     || certificate.getPrice() == null || certificate.getDuration() == null) {
                 throw new InvalidRequestException("Empty field");
             }
-            return service.createCertificate(certificate);
+            return dtoMapper.toDto( service.createCertificate(certificate));
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
@@ -77,7 +87,7 @@ public class GiftCertificateController {
     /**
      * Method allows deleting {@link GiftCertificate} from DB by its id
      *
-     * @param id - primary key to search {@link GiftCertificate} entity object in DB
+     * @param id - primary key to search {@link GiftCertificateDto} DTO of entity object in DB
      */
     @DeleteMapping(value = "/{id}")
     public void deleteCertificate(@PathVariable Long id) {
@@ -92,13 +102,13 @@ public class GiftCertificateController {
      * @return {@link ResponseEntity} ok if update succeeded and INTERNAL_SERVER_ERROR if not
      */
     @PutMapping(consumes = "application/json")
-    public GiftCertificate updateCustomer(@RequestBody String json) {
+    public GiftCertificateDto updateCustomer(@RequestBody String json) {
         try {
             GiftCertificate certificate = objectMapper.readValue(json, GiftCertificate.class);
             if (certificate.getId() == 0) {
                 throw new InvalidRequestException("id = 0");
             }
-            return service.updateCertificate(certificate);
+            return dtoMapper.toDto(service.updateCertificate(certificate));
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
@@ -113,15 +123,18 @@ public class GiftCertificateController {
      *                         is different from "asc" or "desc" in ignored case sort will not be applied.
      * @param descriptionSort- if presents sorting(ASC/DESC) by name will be applied. If nameSort param
      *                         *                 is different from "asc" or "desc" in ignored case sort will not be applied.
-     * @return @return {@link List} of {@link GiftCertificate} entity objects from DB
+     * @return @return {@link List} of {@link GiftCertificateDto} DTO of entity objects from DB
      */
     @GetMapping(value = {"/params"})
-    public List<GiftCertificate> getCertificatesWithParams(@RequestParam("tagId") Optional<String> tagId,
+    public List<GiftCertificateDto> getCertificatesWithParams(@RequestParam("tagId") Optional<String> tagId,
                                                            @RequestParam("part") Optional<String> part,
                                                            @RequestParam("nameSort") Optional<String> nameSort,
                                                            @RequestParam("descriptionSort") Optional<String> descriptionSort) {
         return service.getCertificatesWithParams(tagId, part,
-                nameSort, descriptionSort);
+                nameSort, descriptionSort)
+                .stream()
+                .map(dtoMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 
