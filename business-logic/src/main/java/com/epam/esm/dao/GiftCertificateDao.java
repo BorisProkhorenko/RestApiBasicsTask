@@ -12,7 +12,7 @@ public interface GiftCertificateDao {
 
     List<GiftCertificate> getAllCertificates();
 
-    void deleteCertificateById(Long id);
+    void deleteCertificate(GiftCertificate certificate);
 
     GiftCertificate updateCertificate(GiftCertificate certificate);
 

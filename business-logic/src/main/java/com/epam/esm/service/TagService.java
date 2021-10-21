@@ -27,7 +27,9 @@ public class TagService {
     }
 
     public void deleteTag(Long id) {
-        dao.deleteTagById(id);
+        Tag tag = new Tag();
+        tag.setId(id);
+        dao.deleteTag(tag);
     }
 
     public Tag createTag(Tag tag) {

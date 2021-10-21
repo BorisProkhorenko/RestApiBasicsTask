@@ -2,27 +2,51 @@ package com.epam.esm.model;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import javax.persistence.*;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
+@Entity
+@Table(name = "gift_certificate")
 public class GiftCertificate {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String name;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double price;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer duration;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String createDate;
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_date")
+    private Date createDate;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String lastUpdateDate;
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "last_update_date")
+    private Date lastUpdateDate;
+
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @JoinTable(name = "tag_gift_certificate", joinColumns = @JoinColumn(name = "gift_certificate_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags;
 
     public GiftCertificate() {
@@ -86,19 +110,19 @@ public class GiftCertificate {
         this.duration = duration;
     }
 
-    public String getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
-    public String getLastUpdateDate() {
+    public Date getLastUpdateDate() {
         return lastUpdateDate;
     }
 
-    public void setLastUpdateDate(String lastUpdateDate) {
+    public void setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
     }
 

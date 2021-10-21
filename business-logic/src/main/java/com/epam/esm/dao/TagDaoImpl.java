@@ -2,41 +2,33 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Repository
+@Transactional
 public class TagDaoImpl implements TagDao {
 
-    private static final Logger LOGGER = LogManager.getLogger();
 
-    private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Tag> mapper;
+    private final SessionFactory sessionFactory;
 
-    private final static String SQL_FIND_TAG = "select id as tag_id, name as tag_name from tag where id = ?";
-    private final static String SQL_FIND_TAG_BY_NAME = "select id as tag_id, name as tag_name from tag where name = ?";
-    private final static String SQL_DELETE_TAG = "delete from tag where id = ?";
-    private final static String SQL_GET_ALL = "select id as tag_id, name as tag_name from tag";
-    private final static String SQL_INSERT_TAG = "insert into tag(name) values(?)";
-
-
-    public TagDaoImpl(JdbcTemplate jdbcTemplate, RowMapper<Tag> mapper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.mapper = mapper;
+    public TagDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     @Override
     public Tag getTagById(Long id) {
-        try {
-            return jdbcTemplate.queryForObject(SQL_FIND_TAG, new Object[]{id}, mapper);
-        } catch (DataAccessException e) {
-            LOGGER.error(e.getMessage(), e);
+        Tag tag = getCurrentSession().get(Tag.class, id);
+        if (tag != null) {
+            return tag;
+        } else {
             throw new TagNotFoundException(id);
         }
 
@@ -44,24 +36,26 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Tag getTagByName(String name) {
-        try {
-            return jdbcTemplate.queryForObject(SQL_FIND_TAG_BY_NAME, new Object[]{name}, mapper);
-        } catch (DataAccessException e) {
-            LOGGER.error(e.getMessage(), e);
+        Query query = getCurrentSession().createQuery("from Tag where name =:name")
+                .setParameter("name", name);
+        Tag tag = (Tag) query.uniqueResult();
+        if (tag != null) {
+            return tag;
+        } else {
             throw new TagNotFoundException(name);
         }
-
     }
+
 
     @Override
     public List<Tag> getAllTags() {
 
-        return jdbcTemplate.query(SQL_GET_ALL, mapper);
+        return getCurrentSession().createQuery("from Tag").list();
     }
 
     @Override
-    public void deleteTagById(Long id) {
-        jdbcTemplate.update(SQL_DELETE_TAG, id);
+    public void deleteTag(Tag tag) {
+        getCurrentSession().delete(tag);
     }
 
     @Override
@@ -69,9 +63,16 @@ public class TagDaoImpl implements TagDao {
         try {
             getTagByName(tag.getName());
         } catch (TagNotFoundException ex) {
-            jdbcTemplate.update(SQL_INSERT_TAG, tag.getName());
+            getCurrentSession().saveOrUpdate(tag);
         }
         return tag;
     }
 
+    public Session getCurrentSession() {
+        try {
+            return sessionFactory.getCurrentSession();
+        } catch (HibernateException e) {
+            return sessionFactory.openSession();
+        }
+    }
 }

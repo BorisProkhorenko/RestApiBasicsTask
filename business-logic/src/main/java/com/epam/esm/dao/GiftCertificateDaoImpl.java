@@ -1,90 +1,105 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.CertificateNotFoundException;
+import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Repository
 @Transactional
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<GiftCertificate> mapper;
+    private final SessionFactory sessionFactory;
     private final TagDao tagDao;
 
-    private final static String SQL_FIND_CERTIFICATE = "select gc.id as gc_id, gc.name as gc_name," +
-            "description, price, duration, create_date, last_update_date, tag_id, tag.name as tag_name" +
-            " from gift_certificate as gc left join tag_gift_certificate as tgc on " +
-            "gc.id = tgc.gift_certificate_id left join tag on tgc.tag_id = tag.id where gc.id = ?";
-
-    private final static String SQL_DELETE_CERTIFICATE = "delete from gift_certificate where id = ?";
-
-    private final static String SQL_GET_ALL = "select gc.id as gc_id, gc.name as gc_name," +
-            "description, price, duration, create_date, last_update_date, tag_id, tag.name as tag_name" +
-            " from gift_certificate as gc left join tag_gift_certificate as tgc on " +
-            "gc.id = tgc.gift_certificate_id left join tag on tgc.tag_id = tag.id order by gc_id";
-
-    private final static String SQL_INSERT_CERTIFICATE = "insert into gift_certificate(name, description," +
-            " price, duration) values(?,?,?,?)";
-
-    private final static String SQL_UPDATE_CERTIFICATE = "update gift_certificate set name = coalesce(?,name)," +
-            " description = coalesce(?,description), price = coalesce(?,price), duration = coalesce(?,duration)" +
-            " where id = ?";
-
-    private final static String SQL_INSERT_TAG_CERTIFICATE = "insert into tag_gift_certificate(tag_id," +
-            " gift_certificate_id) values(?,?)";
-
-    private final static String SQL_DELETE_TAGS_CERTIFICATE = "delete from tag_gift_certificate where gift_certificate_id = ?";
-
-    private final static String SQL_FIND_LAST_CERTIFICATE_ID = "select max(id) from gift_certificate";
-
-
-    public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate, RowMapper<GiftCertificate> mapper, TagDao tagDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.mapper = mapper;
+    public GiftCertificateDaoImpl(SessionFactory sessionFactory, TagDao tagDao) {
+        this.sessionFactory = sessionFactory;
         this.tagDao = tagDao;
     }
 
 
     @Override
     public GiftCertificate getCertificateById(Long id) {
-        GiftCertificate certificate;
-        try {
-            certificate = jdbcTemplate.queryForObject(SQL_FIND_CERTIFICATE, new Object[]{id}, mapper);
-        } catch (DataAccessException e) {
-            LOGGER.error(e.getMessage(), e);
+        GiftCertificate certificate = getCurrentSession().get(GiftCertificate.class, id);
+        if (certificate != null) {
+            return certificate;
+        } else {
             throw new CertificateNotFoundException(id);
         }
-        return certificate;
     }
 
     @Override
     public List<GiftCertificate> getAllCertificates() {
-        return jdbcTemplate.query(con ->
-                con.prepareStatement(SQL_GET_ALL, ResultSet.TYPE_SCROLL_INSENSITIVE,
-                        ResultSet.CONCUR_UPDATABLE), mapper);
+        return getCurrentSession().createQuery("from GiftCertificate ").list();
 
     }
 
     @Override
-    public void deleteCertificateById(Long id) {
-        jdbcTemplate.update(SQL_DELETE_CERTIFICATE, id);
+    public void deleteCertificate(GiftCertificate certificate) {
+        getCurrentSession().delete(certificate);
+    }
+
+    @Override
+    public GiftCertificate updateCertificate(GiftCertificate certificate) {
+        EntityManager manager = getCurrentSession().getEntityManagerFactory().createEntityManager();
+        GiftCertificate certificateFromDb = manager.find(GiftCertificate.class, certificate.getId());
+        certificateFromDb = mapFields(certificate, certificateFromDb);
+
+        return (GiftCertificate) getCurrentSession().merge(certificateFromDb);
+    }
+
+    private GiftCertificate mapFields(GiftCertificate newCert, GiftCertificate certificateFromDb) {
+        if (newCert.getName() != null) {
+            certificateFromDb.setName(newCert.getName());
+        }
+        if (newCert.getDescription() != null) {
+            certificateFromDb.setDescription(newCert.getDescription());
+        }
+        if (newCert.getPrice() != null) {
+            certificateFromDb.setPrice(newCert.getPrice());
+        }
+        if (newCert.getDuration() != null) {
+            certificateFromDb.setDuration(newCert.getDuration());
+        }
+        if (newCert.getTags() != null) {
+            certificateFromDb.setTags(newCert.getTags());
+        }
+        return certificateFromDb;
     }
 
 
+    @Override
+    public GiftCertificate createCertificate(GiftCertificate certificate) {
+        if(certificate.getTags()!=null){
+            for (Tag t: certificate.getTags()) {
+                try{
+                    Tag tag = tagDao.getTagByName(t.getName());
+                    t.setId(tag.getId());
+                } catch (TagNotFoundException ignored){
+                }finally {
+                    getCurrentSession().clear();
+                }
+            }
+        }
+        getCurrentSession().save(certificate);
+        return certificate;
+    }
+
+/*
     @Override
     public GiftCertificate updateCertificate(GiftCertificate certificate) {
         getCertificateById(certificate.getId());
@@ -140,6 +155,16 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     private void removeTags(GiftCertificate certificate) {
         jdbcTemplate.update(SQL_DELETE_TAGS_CERTIFICATE,
                 certificate.getId());
+    }
+
+ */
+
+    public Session getCurrentSession() {
+        try {
+            return sessionFactory.getCurrentSession();
+        } catch (HibernateException e) {
+            return sessionFactory.openSession();
+        }
     }
 
 }

@@ -3,12 +3,18 @@ package com.epam.esm.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.persistence.*;
 import java.util.Objects;
 
+@Entity
 public class Tag {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(unique = true)
     private String name;
 
     public Tag() {

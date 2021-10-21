@@ -43,10 +43,13 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
         certificate.setPrice(resultSet.getDouble(PRICE));
         certificate.setDuration(resultSet.getInt(DURATION));
         Date createDate = resultSet.getTimestamp(CREATE_DATE);
+        /*
         certificate.setCreateDate(toISOFormatDate(createDate));
         Date lastUpdateDate = resultSet.getTimestamp(LAST_UPDATE_DATE);
         certificate.setLastUpdateDate(toISOFormatDate(lastUpdateDate));
 
+
+         */
         return mapTags(certificate, resultSet, i);
     }
 

@@ -51,7 +51,9 @@ public class GiftCertificateService {
     }
 
     public void deleteCertificate(Long id) {
-        dao.deleteCertificateById(id);
+        GiftCertificate certificate = new GiftCertificate();
+        certificate.setId(id);
+        dao.deleteCertificate(certificate);
     }
 
     public GiftCertificate updateCertificate(GiftCertificate certificate) {
