@@ -35,6 +35,7 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Tag getTagByName(String name) {
         Query query = getCurrentSession().createQuery("from Tag where name =:name")
                 .setParameter("name", name);
@@ -59,11 +60,12 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Tag createTag(Tag tag) {
         try {
             getTagByName(tag.getName());
         } catch (TagNotFoundException ex) {
-            getCurrentSession().saveOrUpdate(tag);
+            getCurrentSession().save(tag);
         }
         return tag;
     }

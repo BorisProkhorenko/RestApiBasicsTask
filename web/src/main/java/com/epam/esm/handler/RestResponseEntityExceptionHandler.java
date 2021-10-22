@@ -1,9 +1,7 @@
 package com.epam.esm.handler;
 
 
-import com.epam.esm.exceptions.CertificateNotFoundException;
-import com.epam.esm.exceptions.InvalidRequestException;
-import com.epam.esm.exceptions.TagNotFoundException;
+import com.epam.esm.exceptions.*;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.MessageSource;
@@ -37,11 +35,15 @@ public class RestResponseEntityExceptionHandler
 
     private final static String CERTIFICATE_NOT_FOUND_ERROR_CODE = "40401";
     private final static String TAG_NOT_FOUND_ERROR_CODE = "40402";
+    private final static String USER_NOT_FOUND_ERROR_CODE = "40403";
+    private final static String ORDER_NOT_FOUND_ERROR_CODE = "40404";
     private final static String INVALID_REQUEST_ERROR_CODE = "40000";
 
     private final static String MESSAGE_CERTIFICATE_NOT_FOUND = "message.certificate_not_found";
     private final static String MESSAGE_TAG_NOT_FOUND = "message.tag_not_found";
     private final static String MESSAGE_INVALID_REQUEST = "message.invalid_request";
+    private final static String MESSAGE_USER_NOT_FOUND = "message.user_not_found";
+    private final static String MESSAGE_ORDER_NOT_FOUND = "message.order_not_found";
 
     private final MessageSource messageSource;
 
@@ -71,6 +73,25 @@ public class RestResponseEntityExceptionHandler
         return new ResponseEntity<>(info, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler({UserNotFoundException.class})
+    public ResponseEntity<ErrorInfo> handleUserNotFoundException(UserNotFoundException exception, Locale locale) {
+        ErrorInfo info = new ErrorInfo(
+                USER_NOT_FOUND_ERROR_CODE,
+                messageSource.getMessage(
+                        MESSAGE_USER_NOT_FOUND, new Object[]{exception.getMessage()}, locale)
+        );
+        return new ResponseEntity<>(info, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({OrderNotFoundException.class})
+    public ResponseEntity<ErrorInfo> handleOrderNotFoundException(OrderNotFoundException exception, Locale locale) {
+        ErrorInfo info = new ErrorInfo(
+                ORDER_NOT_FOUND_ERROR_CODE,
+                messageSource.getMessage(
+                        MESSAGE_ORDER_NOT_FOUND, new Object[]{exception.getMessage()}, locale)
+        );
+        return new ResponseEntity<>(info, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler({InvalidRequestException.class})
     public ResponseEntity<Object> handleInvalidRequestException(InvalidRequestException exception,

@@ -1,8 +1,12 @@
 package com.epam.esm.config;
 
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.OrderDao;
+import com.epam.esm.dao.UserDao;
 import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.Order;
 import com.epam.esm.model.Tag;
+import com.epam.esm.model.User;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -20,12 +24,10 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 
 @SpringBootApplication(exclude = { //
@@ -34,31 +36,16 @@ import java.util.Set;
         HibernateJpaAutoConfiguration.class})
 @ComponentScan("com.epam.esm")
 @EnableTransactionManagement
-public class RepoApplication {
+public class RepoApplication{
 
     @Autowired
     private Environment env;
-
 
 
     public static void main(String[] args) {
         SpringApplication.run(RepoApplication.class, args);
     }
 
-/*
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        GiftCertificate certificate = new GiftCertificate(56,"Changed", null,5,7);
-        Set<Tag> tagSet = new HashSet<>();
-        Tag tag = new Tag("neo Tagkj;lk;lddbc3g");
-        tagSet.add(tag);
-        certificate.setTags(tagSet);
-        dao.updateCertificate(certificate);
-        System.out.println(dao.getAllCertificates());
-    }
-
-
- */
 
     @Bean(name = "dataSource")
     public DataSource getDataSource() {
