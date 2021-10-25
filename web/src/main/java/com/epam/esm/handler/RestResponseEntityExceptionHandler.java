@@ -99,6 +99,8 @@ public class RestResponseEntityExceptionHandler
         return handleRequestExceptions(exception, HttpStatus.BAD_REQUEST, locale);
     }
 
+
+
     private ResponseEntity<Object> handleRequestExceptions(Exception ex, HttpStatus status, Locale locale) {
         ErrorInfo info = new ErrorInfo(
                 INVALID_REQUEST_ERROR_CODE,

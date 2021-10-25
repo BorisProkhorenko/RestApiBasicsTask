@@ -60,7 +60,7 @@ public class TagController {
      * @param json - tag object to map from request body
      * @return {@link Tag} object, which you created
      */
-    @PostMapping
+    @PostMapping(consumes = "application/json")
     public Tag createTag(@RequestBody String json) {
         try {
             Tag tag = objectMapper.readValue(json, Tag.class);

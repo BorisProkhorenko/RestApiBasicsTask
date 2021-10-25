@@ -7,7 +7,6 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -70,7 +69,7 @@ public class GiftCertificateController {
      * @param json - tag object to map from request body
      * @return {@link GiftCertificateDto} DTO of object, which you created
      */
-    @PostMapping
+    @PostMapping(consumes = "application/json")
     public GiftCertificateDto createCertificate(@RequestBody String json) {
         try {
             GiftCertificate certificate = objectMapper.readValue(json, GiftCertificate.class);
@@ -96,10 +95,10 @@ public class GiftCertificateController {
 
 
     /**
-     * Method allows updating {@link GiftCertificate} info in DB by its id
+     * Method allows updating {@link GiftCertificate} info in DB
      *
      * @param json - tag object to map from request body
-     * @return {@link ResponseEntity} ok if update succeeded and INTERNAL_SERVER_ERROR if not
+     * @return {@link GiftCertificateDto}  - dto of updated entity
      */
     @PutMapping(consumes = "application/json")
     public GiftCertificateDto updateCustomer(@RequestBody String json) {

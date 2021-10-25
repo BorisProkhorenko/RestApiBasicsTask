@@ -24,6 +24,10 @@ public class User {
     public User() {
     }
 
+    public User(long id) {
+        this.id = id;
+    }
+
     public User(long id, String username, Set<Order> orders) {
         this.id = id;
         this.username = username;

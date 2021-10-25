@@ -2,6 +2,7 @@ package com.epam.esm.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -52,10 +53,12 @@ public class Order {
         this.certificates = certificates;
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }
 
+    @JsonProperty
     public void setUser(User user) {
         this.user = user;
     }
@@ -82,11 +85,17 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", user id=" + user.getId() +
-                ", user=" + user.getUsername() +
-                ", certificates=" + certificates +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("Order{");
+        builder.append("id=" + id);
+        if(user != null){
+            builder.append(", user id=" + user.getId());
+            if(user.getUsername()!=null){
+                builder.append(", user=" + user.getUsername());
+            }
+        }
+        builder.append(", certificates=" + certificates);
+        builder.append('}');
+        return builder.toString();
     }
 }

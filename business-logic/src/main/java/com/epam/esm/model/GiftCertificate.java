@@ -44,6 +44,10 @@ public class GiftCertificate {
     public GiftCertificate() {
     }
 
+    public GiftCertificate(long id) {
+        this.id = id;
+    }
+
     public GiftCertificate(String name, String description, double price,
                            int duration) {
         this.name = name;
@@ -139,15 +143,15 @@ public class GiftCertificate {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof GiftCertificate)) return false;
 
         GiftCertificate that = (GiftCertificate) o;
 
         if (id != that.id) return false;
-        if (Double.compare(that.price, price) != 0) return false;
-        if (duration != that.duration) return false;
         if (!Objects.equals(name, that.name)) return false;
         if (!Objects.equals(description, that.description)) return false;
+        if (!Objects.equals(price, that.price)) return false;
+        if (!Objects.equals(duration, that.duration)) return false;
         if (!Objects.equals(createDate, that.createDate)) return false;
         if (!Objects.equals(lastUpdateDate, that.lastUpdateDate))
             return false;
@@ -156,14 +160,11 @@ public class GiftCertificate {
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        result = (int) (id ^ (id >>> 32));
+        int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
-        temp = Double.doubleToLongBits(price);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + duration;
+        result = 31 * result + (price != null ? price.hashCode() : 0);
+        result = 31 * result + (duration != null ? duration.hashCode() : 0);
         result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
         result = 31 * result + (lastUpdateDate != null ? lastUpdateDate.hashCode() : 0);
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
