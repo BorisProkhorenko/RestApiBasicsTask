@@ -12,21 +12,6 @@ import java.util.stream.Collectors;
 
 public enum OperationType {
 
-    FILTER_BY_TAG_ID("filter_by_tag_id") {
-        @Override
-        public List<GiftCertificate> process(List<GiftCertificate> certificates, String value) {
-            try {
-                return certificates.stream()
-                        .filter(certificate -> certificate.getTags().stream().anyMatch(tag ->
-                                tag.getId() == Long.parseLong(value)))
-                        .collect(Collectors.toList());
-            } catch (NumberFormatException e) {
-                LOGGER.error(e.getMessage(), e);
-                throw new InvalidRequestException("id");
-            }
-
-        }
-    },
 
     FILTER_BY_PART("filter_by_part") {
         @Override
@@ -55,7 +40,7 @@ public enum OperationType {
 
     private final String operationName;
 
-    private static final Logger LOGGER = LogManager.getLogger();
+
     private static final String ASC = "ASC";
     private static final String DESC = "DESC";
 

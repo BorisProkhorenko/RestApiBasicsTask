@@ -2,15 +2,18 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.GiftCertificateDtoMapper;
+import com.epam.esm.dto.ParamsDto;
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -30,12 +33,15 @@ public class GiftCertificateController {
     private final GiftCertificateService service;
     private final ObjectMapper objectMapper;
     private final GiftCertificateDtoMapper dtoMapper;
+    private final Jdk8Module jdk8Module;
 
     public GiftCertificateController(GiftCertificateService service, ObjectMapper objectMapper,
-                                     GiftCertificateDtoMapper dtoMapper) {
+                                     GiftCertificateDtoMapper dtoMapper, Jdk8Module jdk8Module) {
         this.service = service;
-        this.objectMapper = objectMapper;
         this.dtoMapper = dtoMapper;
+        this.jdk8Module = jdk8Module;
+        objectMapper.registerModule(jdk8Module);
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -116,24 +122,30 @@ public class GiftCertificateController {
     /**
      * Method allows getting {@link GiftCertificate} objects from db filtered and/or sorted
      *
-     * @param tagId            - if presents filtering by tag id will be applied
-     * @param part             - if presents filtering by part of name and description will be applied
-     * @param nameSort         - if presents sorting(ASC/DESC) by name will be applied. If nameSort param
-     *                         is different from "asc" or "desc" in ignored case sort will not be applied.
-     * @param descriptionSort- if presents sorting(ASC/DESC) by name will be applied. If nameSort param
-     *                         *                 is different from "asc" or "desc" in ignored case sort will not be applied.
+     *
      * @return @return {@link List} of {@link GiftCertificateDto} DTO of entity objects from DB
      */
-    @GetMapping(value = {"/params"})
-    public List<GiftCertificateDto> getCertificatesWithParams(@RequestParam("tagId") Optional<String> tagId,
-                                                           @RequestParam("part") Optional<String> part,
-                                                           @RequestParam("nameSort") Optional<String> nameSort,
-                                                           @RequestParam("descriptionSort") Optional<String> descriptionSort) {
-        return service.getCertificatesWithParams(tagId, part,
-                nameSort, descriptionSort)
-                .stream()
-                .map(dtoMapper::toDto)
-                .collect(Collectors.toList());
+    @PutMapping(value = {"/params"})
+    public List<GiftCertificateDto> getCertificatesWithParams(@RequestBody String json) {
+
+        try {
+
+            ParamsDto paramsDto = objectMapper.readValue(json, ParamsDto.class);
+            Set<String> tagIdSet = paramsDto.getTagIdSet();
+            Optional<String> part = paramsDto.getPart();
+            Optional<String> nameSort = paramsDto.getNameSort();
+            Optional<String> descriptionSort = paramsDto.getDescriptionSort();
+
+            return service.getCertificatesWithParams(tagIdSet, part,
+                            nameSort, descriptionSort)
+                    .stream()
+                    .map(dtoMapper::toDto)
+                    .collect(Collectors.toList());
+        } catch (JsonProcessingException e) {
+            throw new InvalidRequestException(e.getMessage());
+        }
+
+
     }
 
 

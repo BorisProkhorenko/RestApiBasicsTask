@@ -1,15 +1,14 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.GiftCertificate;
 
 import org.springframework.stereotype.Service;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GiftCertificateService {
@@ -29,25 +28,45 @@ public class GiftCertificateService {
     }
 
 
-    public List<GiftCertificate> getCertificatesWithParams(Optional<String> tagId, Optional<String> part,
+    public List<GiftCertificate> getCertificatesWithParams(Set<String> tagIdSet, Optional<String> part,
                                                            Optional<String> nameSort,
                                                            Optional<String> descriptionSort) {
         Map<String, String> operations = new HashMap<>();
-        tagId.ifPresent(s -> operations.put(OperationType.FILTER_BY_TAG_ID.getOperationName(), s));
         part.ifPresent(s -> operations.put(OperationType.FILTER_BY_PART.getOperationName(), s));
         nameSort.ifPresent(s -> operations.put(OperationType.SORT_BY_NAME.getOperationName(), s));
         descriptionSort.ifPresent(s -> operations.put(OperationType.SORT_BY_DESCRIPTION.getOperationName(), s));
-        return getCertificatesWithParams(operations);
+        List<GiftCertificate> certificates = getCertificatesFilteredByTags(tagIdSet);
+        return getCertificatesWithParams(operations, certificates);
     }
 
-    private List<GiftCertificate> getCertificatesWithParams(Map<String, String> filters) {
-        List<GiftCertificate> certificates = getAllCertificates();
+    private List<GiftCertificate> getCertificatesWithParams(Map<String, String> filters,
+                                                            List<GiftCertificate> certificates) {
         for (Map.Entry<String, String> entry : filters.entrySet()) {
             OperationType type = OperationType.findOperationType(entry.getKey());
             certificates = type.process(certificates, entry.getValue());
         }
 
         return certificates;
+    }
+
+    private List<GiftCertificate> getCertificatesFilteredByTags(Set<String> tagIdSet) {
+        List<GiftCertificate> certificates = getAllCertificates();
+        for (String id : tagIdSet) {
+           certificates = filterByTag(certificates, id);
+        }
+        return certificates;
+    }
+
+    public List<GiftCertificate> filterByTag(List<GiftCertificate> certificates, String value) {
+        try {
+            return certificates.stream()
+                    .filter(certificate -> certificate.getTags().stream().anyMatch(tag ->
+                            tag.getId() == Long.parseLong(value)))
+                    .collect(Collectors.toList());
+        } catch (NumberFormatException e) {
+            throw new InvalidRequestException("id");
+        }
+
     }
 
     public void deleteCertificate(Long id) {
@@ -63,7 +82,6 @@ public class GiftCertificateService {
     public GiftCertificate createCertificate(GiftCertificate certificate) {
         return dao.createCertificate(certificate);
     }
-
 
 
 }

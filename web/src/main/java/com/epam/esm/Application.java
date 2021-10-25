@@ -1,6 +1,7 @@
 package com.epam.esm;
 
 
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.springframework.boot.SpringApplication;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,5 +22,10 @@ public class Application {
         source.setBasename("i18n");
         source.setUseCodeAsDefaultMessage(true);
         return source;
+    }
+
+    @Bean
+    public Jdk8Module jdk8Module(){
+        return new Jdk8Module();
     }
 }
