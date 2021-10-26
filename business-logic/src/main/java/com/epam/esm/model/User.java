@@ -9,7 +9,6 @@ import java.util.Set;
 @Entity
 public class User {
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -17,7 +16,6 @@ public class User {
     @Column(unique = true)
     private String username;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
     private Set<Order> orders;
 

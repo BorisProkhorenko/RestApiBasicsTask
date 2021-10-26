@@ -33,13 +33,11 @@ public class GiftCertificateController {
     private final GiftCertificateService service;
     private final ObjectMapper objectMapper;
     private final GiftCertificateDtoMapper dtoMapper;
-    private final Jdk8Module jdk8Module;
 
     public GiftCertificateController(GiftCertificateService service, ObjectMapper objectMapper,
                                      GiftCertificateDtoMapper dtoMapper, Jdk8Module jdk8Module) {
         this.service = service;
         this.dtoMapper = dtoMapper;
-        this.jdk8Module = jdk8Module;
         objectMapper.registerModule(jdk8Module);
         this.objectMapper = objectMapper;
     }

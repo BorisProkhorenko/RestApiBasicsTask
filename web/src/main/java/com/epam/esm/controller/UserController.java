@@ -1,9 +1,11 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.OrderDto;
+import com.epam.esm.dto.OrderDtoMapper;
+import com.epam.esm.dto.UserDto;
+import com.epam.esm.dto.UserDtoMapper;
 import com.epam.esm.exceptions.InvalidRequestException;
-import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
@@ -30,10 +32,15 @@ public class UserController {
 
     private final UserService service;
     private final ObjectMapper objectMapper;
+    private final UserDtoMapper userDtoMapper;
+    private final OrderDtoMapper orderDtoMapper;
 
-    public UserController(UserService service, ObjectMapper objectMapper) {
+    public UserController(UserService service, ObjectMapper objectMapper, UserDtoMapper userDtoMapper,
+                          OrderDtoMapper orderDtoMapper) {
         this.service = service;
         this.objectMapper = objectMapper;
+        this.userDtoMapper = userDtoMapper;
+        this.orderDtoMapper = orderDtoMapper;
     }
 
     /**
@@ -43,8 +50,8 @@ public class UserController {
      * @return {@link User} entity object from DB
      */
     @GetMapping(value = "/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return service.getUserById(id);
+    public UserDto getUserById(@PathVariable Long id) {
+        return userDtoMapper.toDto(service.getUserById(id));
     }
 
     /**
@@ -53,10 +60,11 @@ public class UserController {
      * @return {@link List} of {@link User} entity objects from DB without orders.
      */
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         return service.getAllUsers()
                 .stream()
                 .peek(user -> user.setOrders(new HashSet<>()))
+                .map(userDtoMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -68,8 +76,8 @@ public class UserController {
      * @return {@link Order} entity object from DB
      */
     @GetMapping(value = "/{userId}/{orderId}")
-    public Order getOrderByUserAndId(@PathVariable Long userId, @PathVariable Long orderId) {
-        return service.getOrderByUserAndId(userId, orderId);
+    public OrderDto getOrderByUserAndId(@PathVariable Long userId, @PathVariable Long orderId) {
+        return orderDtoMapper.toDto(service.getOrderByUserAndId(userId, orderId));
     }
 
     /**
@@ -79,14 +87,13 @@ public class UserController {
      * @return {@link Order} of created entity
      */
     @PostMapping(consumes = "application/json")
-    public Order createOrderOnUser(@RequestBody String json) {
+    public OrderDto createOrderOnUser(@RequestBody String json) {
         try {
             Order order = objectMapper.readValue(json, Order.class);
-            System.out.println(order);
             if (order.getUser() == null || order.getCertificates() == null) {
                 throw new InvalidRequestException("Empty field");
             }
-            return service.createOrder(order);
+            return orderDtoMapper.toDto(service.createOrder(order));
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
@@ -99,13 +106,13 @@ public class UserController {
      * @return {@link Order} - updated Entity
      */
     @PutMapping(consumes = "application/json")
-    public Order updateOrder(@RequestBody String json) {
+    public OrderDto updateOrder(@RequestBody String json) {
         try {
             Order order = objectMapper.readValue(json, Order.class);
             if (order.getId() == 0) {
                 throw new InvalidRequestException("id = 0");
             }
-            return service.updateOrder(order);
+            return orderDtoMapper.toDto(service.updateOrder(order));
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
