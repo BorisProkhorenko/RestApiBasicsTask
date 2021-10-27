@@ -1,6 +1,6 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.model.Order;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Set;
@@ -13,15 +13,15 @@ public class UserDto {
     private String username;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<OrderDto> orderDtoSet;
+    private Set<OrderDto> orders;
 
     public UserDto() {
     }
 
-    public UserDto(long id, String username, Set<OrderDto> orderDtoSet) {
+    public UserDto(long id, String username, Set<OrderDto> orders) {
         this.id = id;
         this.username = username;
-        this.orderDtoSet = orderDtoSet;
+        this.orders = orders;
     }
 
     public long getId() {
@@ -40,12 +40,12 @@ public class UserDto {
         this.username = username;
     }
 
-    public Set<OrderDto> getOrderDtoSet() {
-        return orderDtoSet;
+    public Set<OrderDto> getOrders() {
+        return orders;
     }
 
-    public void setOrderDtoSet(Set<OrderDto> orderDtoSet) {
-        this.orderDtoSet = orderDtoSet;
+    public void setOrders(Set<OrderDto> orders) {
+        this.orders = orders;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UserDto {
         return "UserDto{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", orderDtoSet=" + orderDtoSet +
+                ", orderDtoSet=" + orders +
                 '}';
     }
 }

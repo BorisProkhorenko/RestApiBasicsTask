@@ -1,8 +1,8 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.exceptions.InvalidRequestException;
-import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.Certificate;
 
 import org.springframework.stereotype.Service;
 
@@ -11,36 +11,36 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class GiftCertificateService {
+public class CertificateService {
 
-    private final GiftCertificateDao dao;
+    private final CertificateDao dao;
 
-    public GiftCertificateService(GiftCertificateDao dao) {
+    public CertificateService(CertificateDao dao) {
         this.dao = dao;
     }
 
-    public GiftCertificate getCertificateById(Long id) {
+    public Certificate getCertificateById(Long id) {
         return dao.getCertificateById(id);
     }
 
-    public List<GiftCertificate> getAllCertificates() {
+    public List<Certificate> getAllCertificates() {
         return dao.getAllCertificates();
     }
 
 
-    public List<GiftCertificate> getCertificatesWithParams(Set<String> tagIdSet, Optional<String> part,
-                                                           Optional<String> nameSort,
-                                                           Optional<String> descriptionSort) {
+    public List<Certificate> getCertificatesWithParams(Set<String> tagIdSet, Optional<String> part,
+                                                       Optional<String> nameSort,
+                                                       Optional<String> descriptionSort) {
         Map<String, String> operations = new HashMap<>();
         part.ifPresent(s -> operations.put(OperationType.FILTER_BY_PART.getOperationName(), s));
         nameSort.ifPresent(s -> operations.put(OperationType.SORT_BY_NAME.getOperationName(), s));
         descriptionSort.ifPresent(s -> operations.put(OperationType.SORT_BY_DESCRIPTION.getOperationName(), s));
-        List<GiftCertificate> certificates = getCertificatesFilteredByTags(tagIdSet);
+        List<Certificate> certificates = getCertificatesFilteredByTags(tagIdSet);
         return getCertificatesWithParams(operations, certificates);
     }
 
-    private List<GiftCertificate> getCertificatesWithParams(Map<String, String> filters,
-                                                            List<GiftCertificate> certificates) {
+    private List<Certificate> getCertificatesWithParams(Map<String, String> filters,
+                                                        List<Certificate> certificates) {
         for (Map.Entry<String, String> entry : filters.entrySet()) {
             OperationType type = OperationType.findOperationType(entry.getKey());
             certificates = type.process(certificates, entry.getValue());
@@ -49,15 +49,15 @@ public class GiftCertificateService {
         return certificates;
     }
 
-    private List<GiftCertificate> getCertificatesFilteredByTags(Set<String> tagIdSet) {
-        List<GiftCertificate> certificates = getAllCertificates();
+    private List<Certificate> getCertificatesFilteredByTags(Set<String> tagIdSet) {
+        List<Certificate> certificates = getAllCertificates();
         for (String id : tagIdSet) {
            certificates = filterByTag(certificates, id);
         }
         return certificates;
     }
 
-    public List<GiftCertificate> filterByTag(List<GiftCertificate> certificates, String value) {
+    public List<Certificate> filterByTag(List<Certificate> certificates, String value) {
         try {
             return certificates.stream()
                     .filter(certificate -> certificate.getTags().stream().anyMatch(tag ->
@@ -70,16 +70,16 @@ public class GiftCertificateService {
     }
 
     public void deleteCertificate(Long id) {
-        GiftCertificate certificate = new GiftCertificate();
+        Certificate certificate = new Certificate();
         certificate.setId(id);
         dao.deleteCertificate(certificate);
     }
 
-    public GiftCertificate updateCertificate(GiftCertificate certificate) {
+    public Certificate updateCertificate(Certificate certificate) {
         return dao.updateCertificate(certificate);
     }
 
-    public GiftCertificate createCertificate(GiftCertificate certificate) {
+    public Certificate createCertificate(Certificate certificate) {
         return dao.createCertificate(certificate);
     }
 

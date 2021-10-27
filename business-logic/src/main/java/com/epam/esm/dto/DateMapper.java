@@ -11,6 +11,7 @@ public class DateMapper {
     private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm'Z'";
 
     protected String toISOFormatDate(Date date) {
+
         TimeZone tz = TimeZone.getTimeZone(UTC_TIMEZONE);
         DateFormat df = new SimpleDateFormat(DATE_PATTERN);
         df.setTimeZone(tz);

@@ -2,13 +2,12 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.CertificateNotFoundException;
 import com.epam.esm.exceptions.TagNotFoundException;
-import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,20 +16,20 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class GiftCertificateDaoImpl implements GiftCertificateDao {
+public class CertificateDaoImpl implements CertificateDao {
 
     private final SessionFactory sessionFactory;
     private final TagDao tagDao;
 
-    public GiftCertificateDaoImpl(SessionFactory sessionFactory, TagDao tagDao) {
+    public CertificateDaoImpl(SessionFactory sessionFactory, TagDao tagDao) {
         this.sessionFactory = sessionFactory;
         this.tagDao = tagDao;
     }
 
 
     @Override
-    public GiftCertificate getCertificateById(Long id) {
-        GiftCertificate certificate = getCurrentSession().get(GiftCertificate.class, id);
+    public Certificate getCertificateById(Long id) {
+        Certificate certificate = getCurrentSession().get(Certificate.class, id);
         if (certificate != null) {
             return certificate;
         } else {
@@ -39,25 +38,25 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public List<GiftCertificate> getAllCertificates() {
-        return getCurrentSession().createQuery("from GiftCertificate ").list();
+    public List<Certificate> getAllCertificates() {
+        return getCurrentSession().createQuery("from Certificate ").list();
 
     }
 
     @Override
-    public void deleteCertificate(GiftCertificate certificate) {
+    public void deleteCertificate(Certificate certificate) {
         getCurrentSession().delete(certificate);
     }
 
     @Override
-    public GiftCertificate updateCertificate(GiftCertificate certificate) {
-        GiftCertificate certificateFromDb = getCertificateById(certificate.getId());
+    public Certificate updateCertificate(Certificate certificate) {
+        Certificate certificateFromDb = getCertificateById(certificate.getId());
         certificate = mapFields(certificate, certificateFromDb);
 
-        return (GiftCertificate) getCurrentSession().merge(certificate);
+        return (Certificate) getCurrentSession().merge(certificate);
     }
 
-    private GiftCertificate mapFields(GiftCertificate newCert, GiftCertificate certificateFromDb) {
+    private Certificate mapFields(Certificate newCert, Certificate certificateFromDb) {
         if (newCert.getName() != null) {
             certificateFromDb.setName(newCert.getName());
         }
@@ -78,7 +77,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
 
     @Override
-    public GiftCertificate createCertificate(GiftCertificate certificate) {
+    public Certificate createCertificate(Certificate certificate) {
         if(certificate.getTags()!=null){
             for (Tag t: certificate.getTags()) {
                 try{

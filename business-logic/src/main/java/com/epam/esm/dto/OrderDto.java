@@ -1,13 +1,13 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.Certificate;
 import com.epam.esm.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 public class OrderDto {
@@ -27,12 +27,12 @@ public class OrderDto {
     private Double cost;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<GiftCertificate> certificates;
+    private List<Certificate> certificates;
 
     public OrderDto() {
     }
 
-    public OrderDto(long id, User user, String updateDate, Double cost, Set<GiftCertificate> certificates) {
+    public OrderDto(long id, User user, String updateDate, Double cost, List<Certificate> certificates) {
         this.id = id;
         this.user = user;
         this.updateDate = updateDate;
@@ -74,11 +74,11 @@ public class OrderDto {
         this.cost = cost;
     }
 
-    public Set<GiftCertificate> getCertificates() {
+    public List<Certificate> getCertificates() {
         return certificates;
     }
 
-    public void setCertificates(Set<GiftCertificate> certificates) {
+    public void setCertificates(List<Certificate> certificates) {
         this.certificates = certificates;
     }
 

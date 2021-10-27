@@ -37,10 +37,6 @@ public class UserService {
         return orderDao.createOrder(order);
     }
 
-    public Order updateOrder(Order order){
-        return orderDao.updateOrder(order);
-    }
-
     public void deleteOrder(Long id){
         Order order = new Order();
         order.setId(id);

@@ -93,31 +93,12 @@ public class UserController {
             if (order.getUser() == null || order.getCertificates() == null) {
                 throw new InvalidRequestException("Empty field");
             }
+
             return orderDtoMapper.toDto(service.createOrder(order));
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
     }
-
-    /**
-     * Method allows updating {@link Order} info in DB
-     *
-     * @param json - tag object to map from request body
-     * @return {@link Order} - updated Entity
-     */
-    @PutMapping(consumes = "application/json")
-    public OrderDto updateOrder(@RequestBody String json) {
-        try {
-            Order order = objectMapper.readValue(json, Order.class);
-            if (order.getId() == 0) {
-                throw new InvalidRequestException("id = 0");
-            }
-            return orderDtoMapper.toDto(service.updateOrder(order));
-        } catch (JsonProcessingException e) {
-            throw new InvalidRequestException(e.getMessage());
-        }
-    }
-
 
     /**
      * Method allows deleting {@link Order} from DB by its id

@@ -12,7 +12,5 @@ public interface OrderDao {
 
     Order createOrder(Order order);
 
-    Order updateOrder(Order order);
-
     void deleteOrder(Order order);
 }

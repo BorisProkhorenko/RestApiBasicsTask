@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Set;
 
-public class GiftCertificateDto {
+public class CertificateDto {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;
@@ -31,11 +31,11 @@ public class GiftCertificateDto {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Set<Tag> tags;
 
-    public GiftCertificateDto() {
+    public CertificateDto() {
     }
 
-    public GiftCertificateDto(long id, String name, String description, Double price, Integer duration,
-                              String createDate, String lastUpdateDate, Set<Tag> tags) {
+    public CertificateDto(long id, String name, String description, Double price, Integer duration,
+                          String createDate, String lastUpdateDate, Set<Tag> tags) {
         this.id = id;
         this.name = name;
         this.description = description;

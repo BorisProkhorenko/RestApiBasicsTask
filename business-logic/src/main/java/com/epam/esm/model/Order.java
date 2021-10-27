@@ -4,9 +4,7 @@ package com.epam.esm.model;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "`order`")
@@ -26,18 +24,20 @@ public class Order {
     @Column(name = "update_date")
     private Date updateDate;
 
-    @Transient
-    private Double cost;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<OrderCertificate> snapshots;
+
 
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(name = "order_gift_certificate", joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "gift_certificate_id"))
-    private Set<GiftCertificate> certificates;
+    private List<Certificate> certificates;
+
 
     public Order() {
     }
 
-    public Order(long id, User user, Set<GiftCertificate> certificates) {
+    public Order(long id, User user, List<Certificate> certificates) {
         this.id = id;
         this.user = user;
         this.certificates = certificates;
@@ -59,19 +59,11 @@ public class Order {
         this.updateDate = updateDate;
     }
 
-    public Double getCost() {
-        return cost;
-    }
-
-    public void setCost(Double cost) {
-        this.cost = cost;
-    }
-
-    public Set<GiftCertificate> getCertificates() {
+    public List<Certificate> getCertificates() {
         return certificates;
     }
 
-    public void setCertificates(Set<GiftCertificate> certificates) {
+    public void setCertificates(List<Certificate> certificates) {
         this.certificates = certificates;
     }
 
@@ -81,6 +73,14 @@ public class Order {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<OrderCertificate> getSnapshots() {
+        return snapshots;
+    }
+
+    public void setSnapshots(List<OrderCertificate> snapshots) {
+        this.snapshots = snapshots;
     }
 
     @Override
@@ -93,7 +93,6 @@ public class Order {
         if (id != order.id) return false;
         if (!Objects.equals(user, order.user)) return false;
         if (!Objects.equals(updateDate, order.updateDate)) return false;
-        if (!Objects.equals(cost, order.cost)) return false;
         return Objects.equals(certificates, order.certificates);
     }
 
@@ -102,7 +101,6 @@ public class Order {
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (user != null ? user.hashCode() : 0);
         result = 31 * result + (updateDate != null ? updateDate.hashCode() : 0);
-        result = 31 * result + (cost != null ? cost.hashCode() : 0);
         result = 31 * result + (certificates != null ? certificates.hashCode() : 0);
         return result;
     }
@@ -112,16 +110,15 @@ public class Order {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Order{");
-        builder.append("id=" + id);
+        builder.append("id=").append(id);
         if(user != null){
-            builder.append(", user id=" + user.getId());
+            builder.append(", user id=").append(user.getId());
             if(user.getUsername()!=null){
-                builder.append(", user=" + user.getUsername());
+                builder.append(", user=").append(user.getUsername());
             }
         }
-        builder.append(", updateDate=" + updateDate);
-        builder.append(", cost=" + cost);
-        builder.append(", certificates=" + certificates);
+        builder.append(", updateDate=").append(updateDate);
+        builder.append(", certificates=").append(certificates);
         builder.append('}');
         return builder.toString();
     }

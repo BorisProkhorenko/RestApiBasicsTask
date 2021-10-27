@@ -1,7 +1,6 @@
 package com.epam.esm.model;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "gift_certificate")
-public class GiftCertificate {
+public class Certificate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,15 +40,18 @@ public class GiftCertificate {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags;
 
-    public GiftCertificate() {
+
+
+
+    public Certificate() {
     }
 
-    public GiftCertificate(long id) {
+    public Certificate(long id) {
         this.id = id;
     }
 
-    public GiftCertificate(String name, String description, double price,
-                           int duration) {
+    public Certificate(String name, String description, double price,
+                       int duration) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -57,8 +59,8 @@ public class GiftCertificate {
 
     }
 
-    public GiftCertificate(long id, String name, String description,
-                           double price, int duration) {
+    public Certificate(long id, String name, String description,
+                       double price, int duration) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -66,8 +68,8 @@ public class GiftCertificate {
         this.duration = duration;
     }
 
-    public GiftCertificate(long id, String name, String description,
-                           double price, int duration, Set<Tag> tags) {
+    public Certificate(long id, String name, String description,
+                       double price, int duration, Set<Tag> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -143,9 +145,9 @@ public class GiftCertificate {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GiftCertificate)) return false;
+        if (!(o instanceof Certificate)) return false;
 
-        GiftCertificate that = (GiftCertificate) o;
+        Certificate that = (Certificate) o;
 
         if (id != that.id) return false;
         if (!Objects.equals(name, that.name)) return false;

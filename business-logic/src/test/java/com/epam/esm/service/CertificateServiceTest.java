@@ -1,9 +1,8 @@
 package com.epam.esm.service;
 
 import com.epam.esm.config.RepoApplication;
-import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.exceptions.InvalidRequestException;
-import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.dao.CertificateDao;
+import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,45 +18,45 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = RepoApplication.class)
-public class GiftCertificateServiceTest {
+public class CertificateServiceTest {
 
-    private static GiftCertificateService service;
+    private static CertificateService service;
     private final static String MOCK = "mock";
-    private final static GiftCertificate MOCK_CERTIFICATE =
-            new GiftCertificate(MOCK, MOCK, 3, 3);
+    private final static Certificate MOCK_CERTIFICATE =
+            new Certificate(MOCK, MOCK, 3, 3);
 
     @BeforeAll
     public static void init() {
-        GiftCertificateDao mockDao = Mockito.mock(GiftCertificateDao.class);
+        CertificateDao mockDao = Mockito.mock(CertificateDao.class);
         when(mockDao.getCertificateById(anyLong()))
                 .thenReturn(MOCK_CERTIFICATE);
         when(mockDao.createCertificate(any()))
                 .thenReturn(MOCK_CERTIFICATE);
         when(mockDao.updateCertificate(any()))
                 .thenReturn(MOCK_CERTIFICATE);
-        GiftCertificate certificate1 = new GiftCertificate("name", "description", 4, 4);
+        Certificate certificate1 = new Certificate("name", "description", 4, 4);
         Tag tag = new Tag(1L, "tag");
         Set<Tag> tagSet = new HashSet<>();
         tagSet.add(tag);
         certificate1.setTags(tagSet);
         Set<Tag> emptySet = new HashSet<>();
         MOCK_CERTIFICATE.setTags(emptySet);
-        GiftCertificate certificate2 = new GiftCertificate("test", "test", 4, 4);
+        Certificate certificate2 = new Certificate("test", "test", 4, 4);
         certificate2.setTags(emptySet);
 
-        List<GiftCertificate> certificates = Arrays.asList(MOCK_CERTIFICATE, certificate2, certificate1);
+        List<Certificate> certificates = Arrays.asList(MOCK_CERTIFICATE, certificate2, certificate1);
         when(mockDao.getAllCertificates())
                 .thenReturn(certificates);
 
 
-        service = new GiftCertificateService(mockDao);
+        service = new CertificateService(mockDao);
     }
 
 
     @Test
     public void testGetAll() {
         //when
-        List<GiftCertificate> certificates = service.getAllCertificates();
+        List<Certificate> certificates = service.getAllCertificates();
         //then
         Assertions.assertNotNull(certificates);
     }
@@ -65,7 +64,7 @@ public class GiftCertificateServiceTest {
     @Test
     public void testGetById() {
         //when
-        GiftCertificate certificate = service.getCertificateById(1L);
+        Certificate certificate = service.getCertificateById(1L);
         //then
         Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
     }
@@ -73,7 +72,7 @@ public class GiftCertificateServiceTest {
     @Test
     public void testCreate() {
         //when
-        GiftCertificate certificate = service.createCertificate(MOCK_CERTIFICATE);
+        Certificate certificate = service.createCertificate(MOCK_CERTIFICATE);
         //then
         Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
     }
@@ -81,7 +80,7 @@ public class GiftCertificateServiceTest {
     @Test
     public void testUpdate() {
         //when
-        GiftCertificate certificate = service.updateCertificate(MOCK_CERTIFICATE);
+        Certificate certificate = service.updateCertificate(MOCK_CERTIFICATE);
         //then
         Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
     }
