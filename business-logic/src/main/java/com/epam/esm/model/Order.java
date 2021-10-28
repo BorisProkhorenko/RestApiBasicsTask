@@ -19,7 +19,7 @@ public class Order {
     private long id;
 
     @ManyToOne
-    @JoinColumn (name="user_id", nullable=false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
 
@@ -33,11 +33,13 @@ public class Order {
     private List<OrderCertificate> snapshots;
 
     @NotAudited
-    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "order_gift_certificate", joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "gift_certificate_id"))
     private List<Certificate> certificates;
 
+
+    private double cost;
 
     public Order() {
     }
@@ -88,6 +90,14 @@ public class Order {
         this.snapshots = snapshots;
     }
 
+    public double getCost() {
+        return cost;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -116,12 +126,13 @@ public class Order {
         StringBuilder builder = new StringBuilder();
         builder.append("Order{");
         builder.append("id=").append(id);
-        if(user != null){
+        if (user != null) {
             builder.append(", user id=").append(user.getId());
-            if(user.getUsername()!=null){
+            if (user.getUsername() != null) {
                 builder.append(", user=").append(user.getUsername());
             }
         }
+        builder.append(", cost=").append(cost);
         builder.append(", updateDate=").append(updateDate);
         builder.append(", certificates=").append(certificates);
         builder.append('}');

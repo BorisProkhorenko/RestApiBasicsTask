@@ -57,10 +57,21 @@ public class OrderDaoImpl implements OrderDao {
     public Order createOrder(Order order) {
         verifyCertificatesWithDb(order);
         createSnapshots(order);
+        mapCost(order);
         getCurrentSession().save(order);
         return order;
     }
 
+    private void mapCost(Order order) {
+        double cost = 0d;
+        for (Certificate certificate : order.getCertificates()) {
+            if (certificate.getPrice() != null) {
+                cost += certificate.getPrice();
+            }
+        }
+        order.setCost(cost);
+
+    }
 
     private void verifyCertificatesWithDb(Order order) {
         if (order.getCertificates() != null) {
