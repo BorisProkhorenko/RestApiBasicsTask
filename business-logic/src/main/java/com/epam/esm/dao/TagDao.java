@@ -15,4 +15,6 @@ public interface TagDao {
     void deleteTag(Tag tag);
 
     Tag createTag(Tag tag);
+
+    Tag getMostUsedTagOfUserWithHighestOrdersCost();
 }

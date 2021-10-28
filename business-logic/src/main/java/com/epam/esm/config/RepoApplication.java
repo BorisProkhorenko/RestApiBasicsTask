@@ -1,7 +1,10 @@
 package com.epam.esm.config;
 
+import com.epam.esm.dao.UserDaoImpl;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +14,6 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -27,7 +29,7 @@ import java.util.*;
         HibernateJpaAutoConfiguration.class})
 @ComponentScan("com.epam.esm")
 @EnableTransactionManagement
-public class RepoApplication{
+public class RepoApplication {
 
     @Autowired
     private Environment env;
@@ -74,6 +76,7 @@ public class RepoApplication{
     public HibernateTransactionManager getTransactionManager(SessionFactory sessionFactory) {
         return new HibernateTransactionManager(sessionFactory);
     }
+
 
 
 }

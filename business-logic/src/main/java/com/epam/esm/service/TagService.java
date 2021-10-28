@@ -36,5 +36,8 @@ public class TagService {
         return dao.createTag(tag);
     }
 
+    public Tag getMostUsedTagOfUserWithHighestOrdersCost(){
+        return dao.getMostUsedTagOfUserWithHighestOrdersCost();
+    }
 
 }

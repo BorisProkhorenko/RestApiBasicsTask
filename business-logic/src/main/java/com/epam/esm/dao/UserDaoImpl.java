@@ -75,10 +75,7 @@ public class UserDaoImpl implements UserDao{
             return sessionFactory.openSession();
         }
     }
-/*
-    public Tag getTagOfUserWithHighestCostOrders(){
 
-    }
 
- */
+
 }

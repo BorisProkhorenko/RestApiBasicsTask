@@ -2,13 +2,11 @@ package com.epam.esm.dao;
 
 import com.epam.esm.dto.CertificateJsonMapper;
 import com.epam.esm.exceptions.OrderNotFoundException;
-import com.epam.esm.model.Certificate;
-import com.epam.esm.model.Order;
-import com.epam.esm.model.OrderCertificate;
-import com.epam.esm.model.User;
+import com.epam.esm.model.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

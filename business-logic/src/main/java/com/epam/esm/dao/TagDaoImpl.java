@@ -18,6 +18,9 @@ public class TagDaoImpl implements TagDao {
 
 
     private final SessionFactory sessionFactory;
+    private static final String HQL_GET_TAG_BY_ORDERS =" select tag FROM User u join u.orders o" +
+            " join o.certificates c join c.tags tag group by tag.id order by" +
+            " sum(o.cost) desc";
 
     public TagDaoImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -68,6 +71,13 @@ public class TagDaoImpl implements TagDao {
             getCurrentSession().save(tag);
         }
         return tag;
+    }
+
+    @Override
+    public Tag getMostUsedTagOfUserWithHighestOrdersCost(){
+        Query query = getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS);
+        query.setMaxResults(1);
+        return  (Tag) query.uniqueResult();
     }
 
     public Session getCurrentSession() {

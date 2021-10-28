@@ -81,4 +81,14 @@ public class TagController {
         service.deleteTag(id);
     }
 
+
+    /**
+     * Method allows getting all {@link Tag} entity objects from DB
+     *
+     * @return {@link List} of {@link Tag} entity objects from DB
+     */
+    @GetMapping(value = "/highest-order")
+    public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
+        return service.getMostUsedTagOfUserWithHighestOrdersCost();
+    }
 }
