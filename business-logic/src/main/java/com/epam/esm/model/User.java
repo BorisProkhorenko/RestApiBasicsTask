@@ -1,12 +1,18 @@
 package com.epam.esm.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
+@AuditTable("user_audit")
+@Table(name ="`user`")
+@Audited
 public class User {
 
     @Id
@@ -16,6 +22,7 @@ public class User {
     @Column(unique = true)
     private String username;
 
+    @NotAudited
     @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
     private Set<Order> orders;
 

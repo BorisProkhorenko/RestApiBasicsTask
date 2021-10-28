@@ -2,11 +2,17 @@ package com.epam.esm.model;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@AuditTable("tag_audit")
+@Table(name ="tag")
+@Audited
 public class Tag {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)

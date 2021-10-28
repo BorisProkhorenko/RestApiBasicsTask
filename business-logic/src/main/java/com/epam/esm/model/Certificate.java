@@ -3,6 +3,11 @@ package com.epam.esm.model;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 
 import javax.persistence.*;
 import java.util.Date;
@@ -11,6 +16,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "gift_certificate")
+@Audited
 public class Certificate {
 
     @Id
@@ -35,6 +41,7 @@ public class Certificate {
     @Column(name = "last_update_date")
     private Date lastUpdateDate;
 
+    @NotAudited
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(name = "tag_gift_certificate", joinColumns = @JoinColumn(name = "gift_certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))

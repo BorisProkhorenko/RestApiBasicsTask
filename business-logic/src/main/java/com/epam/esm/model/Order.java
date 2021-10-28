@@ -2,12 +2,16 @@ package com.epam.esm.model;
 
 
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 
 import javax.persistence.*;
 import java.util.*;
 
 @Entity
 @Table(name = "`order`")
+@Audited
 public class Order {
 
     @Id
@@ -24,10 +28,11 @@ public class Order {
     @Column(name = "update_date")
     private Date updateDate;
 
+    @NotAudited
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderCertificate> snapshots;
 
-
+    @NotAudited
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(name = "order_gift_certificate", joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "gift_certificate_id"))
