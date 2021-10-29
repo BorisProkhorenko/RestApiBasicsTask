@@ -7,26 +7,26 @@ import java.util.Set;
 
 public class ParamsDto {
 
-    private Set<String> tagIdSet;
+    private Set<Long> tagIdSet;
     private Optional<String> part;
     private Optional<String> nameSort;
     private Optional<String> descriptionSort;
 
-    public ParamsDto(Set<String> tagIdSet, Optional<String> part, Optional<String> nameSort, Optional<String> descriptionSort) {
+    public ParamsDto(Set<Long> tagIdSet, Optional<String> part, Optional<String> nameSort, Optional<String> descriptionSort) {
         this.tagIdSet = tagIdSet;
         this.part = part;
         this.nameSort = nameSort;
         this.descriptionSort = descriptionSort;
     }
 
-    public Set<String> getTagIdSet() {
+    public Set<Long> getTagIdSet() {
         if(tagIdSet == null){
             tagIdSet = new HashSet<>();
         }
         return tagIdSet;
     }
 
-    public void setTagIdSet(Set<String> tagIdSet) {
+    public void setTagIdSet(Set<Long> tagIdSet) {
         if(tagIdSet == null){
             tagIdSet = new HashSet<>();
         }

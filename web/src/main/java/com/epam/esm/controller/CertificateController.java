@@ -124,16 +124,17 @@ public class CertificateController {
      * @return @return {@link List} of {@link CertificateDto} DTO of entity objects from DB
      */
     @PutMapping(value = {"/params"})
-    public List<CertificateDto> getCertificatesWithParams(@RequestBody String json) {
+    public List<CertificateDto> getCertificatesWithParams(@RequestBody String json,
+                                                          @RequestParam(name = "page") Optional<Integer> optionalPage) {
         try {
             ParamsDto paramsDto = objectMapper.readValue(json, ParamsDto.class);
-            Set<String> tagIdSet = paramsDto.getTagIdSet();
+            Set<Long> tagIdSet = paramsDto.getTagIdSet();
             Optional<String> part = paramsDto.getPart();
             Optional<String> nameSort = paramsDto.getNameSort();
             Optional<String> descriptionSort = paramsDto.getDescriptionSort();
-
+            int page = optionalPage.orElse(1);
             return service.getCertificatesWithParams(tagIdSet, part,
-                            nameSort, descriptionSort)
+                            nameSort, descriptionSort, page)
                     .stream()
                     .map(dtoMapper::toDto)
                     .collect(Collectors.toList());

@@ -1,6 +1,9 @@
 package com.epam.esm.config;
 
+import com.epam.esm.dao.CertificateDaoImpl;
 import com.epam.esm.dao.UserDaoImpl;
+import com.epam.esm.model.Certificate;
+import com.epam.esm.model.Tag;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -38,7 +41,6 @@ public class RepoApplication {
     public static void main(String[] args) {
         SpringApplication.run(RepoApplication.class, args);
     }
-
 
     @Bean(name = "dataSource")
     public DataSource getDataSource() {

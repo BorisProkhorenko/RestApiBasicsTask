@@ -4,6 +4,7 @@ import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.Certificate;
 
+import com.epam.esm.model.Tag;
 import org.springframework.stereotype.Service;
 
 
@@ -25,56 +26,30 @@ public class CertificateService {
     }
 
     public List<Certificate> getAllCertificates(int page) {
-        page--;
-        if(page<0){
-            page=0;
-        }
-        int start = page * CERTIFICATES_ON_PAGE;
+        int start = calculateStartPage(page);
         return dao.getAllCertificates(start,CERTIFICATES_ON_PAGE);
     }
     public List<Certificate> getAllCertificates() {
         return dao.getAllCertificates();
     }
 
-    public List<Certificate> getCertificatesWithParams(Set<String> tagIdSet, Optional<String> part,
+    public List<Certificate> getCertificatesWithParams(Set<Long> tagIdSet, Optional<String> part,
                                                        Optional<String> nameSort,
-                                                       Optional<String> descriptionSort) {
-        Map<String, String> operations = new HashMap<>();
-        part.ifPresent(s -> operations.put(OperationType.FILTER_BY_PART.getOperationName(), s));
-        nameSort.ifPresent(s -> operations.put(OperationType.SORT_BY_NAME.getOperationName(), s));
-        descriptionSort.ifPresent(s -> operations.put(OperationType.SORT_BY_DESCRIPTION.getOperationName(), s));
-        List<Certificate> certificates = getCertificatesFilteredByTags(tagIdSet);
-        return getCertificatesWithParams(operations, certificates);
+                                                       Optional<String> dateSort, int page) {
+
+        int start = calculateStartPage(page);
+        Set<Tag> tags = tagIdSet.stream()
+                .map(Tag::new)
+                .collect(Collectors.toSet());
+        return dao.getCertificatesWithParams(tags,part,nameSort,dateSort,start,CERTIFICATES_ON_PAGE);
     }
 
-    private List<Certificate> getCertificatesWithParams(Map<String, String> filters,
-                                                        List<Certificate> certificates) {
-        for (Map.Entry<String, String> entry : filters.entrySet()) {
-            OperationType type = OperationType.findOperationType(entry.getKey());
-            certificates = type.process(certificates, entry.getValue());
+    private int calculateStartPage(int page){
+        page--;
+        if(page<0){
+            page=0;
         }
-
-        return certificates;
-    }
-
-    private List<Certificate> getCertificatesFilteredByTags(Set<String> tagIdSet) {
-        List<Certificate> certificates = getAllCertificates();
-        for (String id : tagIdSet) {
-           certificates = filterByTag(certificates, id);
-        }
-        return certificates;
-    }
-
-    public List<Certificate> filterByTag(List<Certificate> certificates, String value) {
-        try {
-            return certificates.stream()
-                    .filter(certificate -> certificate.getTags().stream().anyMatch(tag ->
-                            tag.getId() == Long.parseLong(value)))
-                    .collect(Collectors.toList());
-        } catch (NumberFormatException e) {
-            throw new InvalidRequestException("id");
-        }
-
+        return page * CERTIFICATES_ON_PAGE;
     }
 
     public void deleteCertificate(Long id) {
