@@ -30,7 +30,7 @@ public class TagServiceTest {
                 .thenReturn(new Tag(MOCK));
         when(mockDao.createTag(any()))
                 .thenReturn(new Tag(MOCK));
-        when(mockDao.getAllTags())
+        when(mockDao.getAllTags(0,5))
                 .thenReturn(new ArrayList<>());
         service = new TagService(mockDao);
     }
@@ -39,7 +39,7 @@ public class TagServiceTest {
     @Test
     public void testGetAll() {
         //when
-        List<Tag> tags = service.getAllTags();
+        List<Tag> tags = service.getAllTags(0);
         //then
         Assertions.assertNotNull(tags);
     }

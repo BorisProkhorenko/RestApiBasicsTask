@@ -60,8 +60,9 @@ public class CertificateController {
      * @return {@link List} of {@link CertificateDto} DTO of entity objects from DB
      */
     @GetMapping
-    public List<CertificateDto> getAllCertificates() {
-        return service.getAllCertificates()
+    public List<CertificateDto> getAllCertificates(@RequestParam(name = "page") Optional<Integer> optionalPage) {
+        int page = optionalPage.orElse(1);
+        return service.getAllCertificates(page)
                 .stream()
                 .map(dtoMapper::toDto)
                 .collect(Collectors.toList());
@@ -81,7 +82,7 @@ public class CertificateController {
                     || certificate.getPrice() == null || certificate.getDuration() == null) {
                 throw new InvalidRequestException("Empty field");
             }
-            return dtoMapper.toDto( service.createCertificate(certificate));
+            return dtoMapper.toDto(service.createCertificate(certificate));
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
@@ -120,14 +121,11 @@ public class CertificateController {
     /**
      * Method allows getting {@link Certificate} objects from db filtered and/or sorted
      *
-     *
      * @return @return {@link List} of {@link CertificateDto} DTO of entity objects from DB
      */
     @PutMapping(value = {"/params"})
     public List<CertificateDto> getCertificatesWithParams(@RequestBody String json) {
-
         try {
-
             ParamsDto paramsDto = objectMapper.readValue(json, ParamsDto.class);
             Set<String> tagIdSet = paramsDto.getTagIdSet();
             Optional<String> part = paramsDto.getPart();

@@ -10,7 +10,7 @@ public interface TagDao {
 
     Tag getTagByName(String name);
 
-    List<Tag> getAllTags();
+    List<Tag> getAllTags(int start, int limit);
 
     void deleteTag(Tag tag);
 

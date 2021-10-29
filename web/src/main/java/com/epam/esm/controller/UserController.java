@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -60,8 +61,9 @@ public class UserController {
      * @return {@link List} of {@link User} entity objects from DB without orders.
      */
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        return service.getAllUsers()
+    public List<UserDto> getAllUsers(@RequestParam(name = "page") Optional<Integer> optionalPage) {
+        int page = optionalPage.orElse(1);
+        return service.getAllUsers(page)
                 .stream()
                 .peek(user -> user.setOrders(new HashSet<>()))
                 .map(userDtoMapper::toDto)

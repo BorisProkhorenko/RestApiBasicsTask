@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class CertificateService {
 
     private final CertificateDao dao;
+    private final static int CERTIFICATES_ON_PAGE = 5;
 
     public CertificateService(CertificateDao dao) {
         this.dao = dao;
@@ -23,10 +24,17 @@ public class CertificateService {
         return dao.getCertificateById(id);
     }
 
+    public List<Certificate> getAllCertificates(int page) {
+        page--;
+        if(page<0){
+            page=0;
+        }
+        int start = page * CERTIFICATES_ON_PAGE;
+        return dao.getAllCertificates(start,CERTIFICATES_ON_PAGE);
+    }
     public List<Certificate> getAllCertificates() {
         return dao.getAllCertificates();
     }
-
 
     public List<Certificate> getCertificatesWithParams(Set<String> tagIdSet, Optional<String> part,
                                                        Optional<String> nameSort,

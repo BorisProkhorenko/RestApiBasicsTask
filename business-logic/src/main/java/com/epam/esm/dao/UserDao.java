@@ -10,7 +10,7 @@ public interface UserDao {
 
     User getUserByUsername(String username);
 
-    List<User> getAllUsers();
+    List<User> getAllUsers(int start, int limit);
 
     User createUser(User user);
 

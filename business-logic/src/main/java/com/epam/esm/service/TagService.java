@@ -11,6 +11,7 @@ public class TagService {
 
 
     private final TagDao dao;
+    private final static int TAGS_ON_PAGE = 10;
 
     public TagService(TagDao dao) {
         this.dao = dao;
@@ -21,9 +22,13 @@ public class TagService {
         return dao.getTagById(id);
     }
 
-    public List<Tag> getAllTags() {
-
-        return dao.getAllTags();
+    public List<Tag> getAllTags(int page) {
+        page--;
+        if(page<0){
+            page=0;
+        }
+        int start = page * TAGS_ON_PAGE;
+        return dao.getAllTags(start, TAGS_ON_PAGE);
     }
 
     public void deleteTag(Long id) {
@@ -36,7 +41,7 @@ public class TagService {
         return dao.createTag(tag);
     }
 
-    public Tag getMostUsedTagOfUserWithHighestOrdersCost(){
+    public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
         return dao.getMostUsedTagOfUserWithHighestOrdersCost();
     }
 

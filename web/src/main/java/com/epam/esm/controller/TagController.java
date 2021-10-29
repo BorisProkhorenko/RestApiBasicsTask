@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -50,8 +51,9 @@ public class TagController {
      * @return {@link List} of {@link Tag} entity objects from DB
      */
     @GetMapping
-    public List<Tag> getAllTags() {
-        return service.getAllTags();
+    public List<Tag> getAllTags(@RequestParam(name = "page") Optional<Integer> optionalPage) {
+        int page = optionalPage.orElse(1);
+        return service.getAllTags(page);
     }
 
     /**

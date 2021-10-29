@@ -10,6 +10,8 @@ public interface CertificateDao {
 
     Certificate getCertificateById(Long id);
 
+    List<Certificate> getAllCertificates(int start, int limit);
+
     List<Certificate> getAllCertificates();
 
     void deleteCertificate(Certificate certificate);

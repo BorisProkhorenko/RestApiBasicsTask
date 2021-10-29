@@ -15,6 +15,8 @@ public class UserService {
     private final UserDao userDao;
     private final OrderDao orderDao;
 
+    private final static int USERS_ON_PAGE = 10;
+
     public UserService(UserDao userDao, OrderDao orderDao) {
         this.userDao = userDao;
         this.orderDao = orderDao;
@@ -25,9 +27,13 @@ public class UserService {
         return userDao.getUserById(id);
     }
 
-    public List<User> getAllUsers() {
-
-        return userDao.getAllUsers();
+    public List<User> getAllUsers(int page) {
+        page--;
+        if(page<0){
+            page=0;
+        }
+        int start = page * USERS_ON_PAGE;
+        return userDao.getAllUsers(start, USERS_ON_PAGE);
     }
 
 

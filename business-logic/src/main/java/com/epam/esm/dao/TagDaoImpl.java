@@ -52,9 +52,11 @@ public class TagDaoImpl implements TagDao {
 
 
     @Override
-    public List<Tag> getAllTags() {
-
-        return getCurrentSession().createQuery("from Tag").list();
+    public List<Tag> getAllTags(int start, int limit) {
+        return getCurrentSession().createQuery("from Tag")
+                .setFirstResult(start)
+                .setMaxResults(limit)
+                .list();
     }
 
     @Override
@@ -75,9 +77,9 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Tag getMostUsedTagOfUserWithHighestOrdersCost(){
-        Query query = getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS);
-        query.setMaxResults(1);
-        return  (Tag) query.uniqueResult();
+        return  (Tag) getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS)
+                .setMaxResults(1)
+                .uniqueResult();
     }
 
     public Session getCurrentSession() {

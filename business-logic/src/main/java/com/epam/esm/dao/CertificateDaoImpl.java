@@ -38,11 +38,20 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public List<Certificate> getAllCertificates() {
-        return getCurrentSession().createQuery("from Certificate ").list();
+    public List<Certificate> getAllCertificates(int start, int limit) {
+            return getCurrentSession().createQuery("from Certificate ")
+                    .setFirstResult(start)
+                    .setMaxResults(limit)
+                    .list();
 
     }
 
+    @Override
+    public List<Certificate> getAllCertificates() {
+        return getCurrentSession().createQuery("from Certificate ")
+                .list();
+
+    }
     @Override
     public void deleteCertificate(Certificate certificate) {
         getCurrentSession().delete(certificate);
