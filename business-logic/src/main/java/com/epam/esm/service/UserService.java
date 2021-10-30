@@ -8,6 +8,7 @@ import com.epam.esm.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -15,7 +16,9 @@ public class UserService {
     private final UserDao userDao;
     private final OrderDao orderDao;
 
-    private final static int USERS_ON_PAGE = 10;
+    private final static int DEFAULT_LIMIT = 10;
+    private final static int DEFAULT_OFFSET = 0;
+
 
     public UserService(UserDao userDao, OrderDao orderDao) {
         this.userDao = userDao;
@@ -27,13 +30,17 @@ public class UserService {
         return userDao.getUserById(id);
     }
 
-    public List<User> getAllUsers(int page) {
-        page--;
-        if(page<0){
-            page=0;
+    public List<User> getAllUsers(Optional<Integer> limit, Optional<Integer> offset) {
+
+        int start = offset.orElse(DEFAULT_OFFSET);
+        int lim = limit.orElse(DEFAULT_LIMIT);
+        if (start < 0) {
+            start = DEFAULT_OFFSET;
         }
-        int start = page * USERS_ON_PAGE;
-        return userDao.getAllUsers(start, USERS_ON_PAGE);
+        if (lim <= 0) {
+            lim = DEFAULT_LIMIT;
+        }
+        return userDao.getAllUsers(start, lim);
     }
 
 

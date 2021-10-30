@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -39,7 +40,7 @@ public class TagServiceTest {
     @Test
     public void testGetAll() {
         //when
-        List<Tag> tags = service.getAllTags(0);
+        List<Tag> tags = service.getAllTags(Optional.of(10),Optional.of(0));
         //then
         Assertions.assertNotNull(tags);
     }

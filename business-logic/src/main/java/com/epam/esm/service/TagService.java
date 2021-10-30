@@ -5,13 +5,15 @@ import com.epam.esm.model.Tag;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TagService {
 
 
     private final TagDao dao;
-    private final static int TAGS_ON_PAGE = 10;
+    private final static int DEFAULT_LIMIT = 20;
+    private final static int DEFAULT_OFFSET = 0;
 
     public TagService(TagDao dao) {
         this.dao = dao;
@@ -22,13 +24,18 @@ public class TagService {
         return dao.getTagById(id);
     }
 
-    public List<Tag> getAllTags(int page) {
-        page--;
-        if(page<0){
-            page=0;
+    public List<Tag> getAllTags(Optional<Integer> limit, Optional<Integer> offset) {
+
+        int start = offset.orElse(DEFAULT_OFFSET);
+        int lim = limit.orElse(DEFAULT_LIMIT);
+        if (start < 0) {
+            start = DEFAULT_OFFSET;
         }
-        int start = page * TAGS_ON_PAGE;
-        return dao.getAllTags(start, TAGS_ON_PAGE);
+        if (lim <= 0) {
+            lim = DEFAULT_LIMIT;
+        }
+
+        return dao.getAllTags(start, lim);
     }
 
     public void deleteTag(Long id) {

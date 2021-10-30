@@ -13,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @Repository
@@ -50,17 +47,15 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public List<Certificate> getAllCertificates(int start, int limit) {
-        return getCurrentSession().createQuery("from Certificate ")
-                .setFirstResult(start)
-                .setMaxResults(limit)
-                .list();
+        return getAllCertificates(new HashSet<>(),Optional.empty(),Optional.empty(),
+                Optional.empty(),start,limit);
 
     }
 
     @Override
     public List<Certificate> getAllCertificates() {
-        return getCurrentSession().createQuery("from Certificate ")
-                .list();
+        return getAllCertificates(new HashSet<>(),Optional.empty(),Optional.empty(),
+                Optional.empty(),0,100000);
 
     }
 
@@ -124,7 +119,7 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public List<Certificate> getCertificatesWithParams(Set<Tag> tagIdSet, Optional<String> part,
+    public List<Certificate> getAllCertificates(Set<Tag> tagIdSet, Optional<String> part,
                                                        Optional<String> nameSort, Optional<String> dateSort,
                                                        int start, int limit) {
         CriteriaBuilder cb = getCurrentSession().getCriteriaBuilder();

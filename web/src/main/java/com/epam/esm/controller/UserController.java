@@ -61,9 +61,9 @@ public class UserController {
      * @return {@link List} of {@link User} entity objects from DB without orders.
      */
     @GetMapping
-    public List<UserDto> getAllUsers(@RequestParam(name = "page") Optional<Integer> optionalPage) {
-        int page = optionalPage.orElse(1);
-        return service.getAllUsers(page)
+    public List<UserDto> getAllUsers(@RequestParam(name = "limit") Optional<Integer> limit,
+                                     @RequestParam(name = "offset") Optional<Integer> offset) {
+        return service.getAllUsers(limit,offset)
                 .stream()
                 .peek(user -> user.setOrders(new HashSet<>()))
                 .map(userDtoMapper::toDto)

@@ -23,7 +23,7 @@ public interface CertificateDao {
 
     Certificate createCertificate(Certificate certificate);
 
-    List<Certificate> getCertificatesWithParams(Set<Tag> tagIdSet, Optional<String> part,
+    List<Certificate> getAllCertificates(Set<Tag> tagIdSet, Optional<String> part,
                                                 Optional<String> nameSort, Optional<String> dateSort,
                                                 int start, int limit);
 

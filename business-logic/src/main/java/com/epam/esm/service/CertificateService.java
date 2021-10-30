@@ -1,7 +1,6 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dao.CertificateDao;
-import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.Certificate;
 
 import com.epam.esm.model.Tag;
@@ -15,7 +14,8 @@ import java.util.stream.Collectors;
 public class CertificateService {
 
     private final CertificateDao dao;
-    private final static int CERTIFICATES_ON_PAGE = 5;
+    private final static int DEFAULT_LIMIT = 5;
+    private final static int DEFAULT_OFFSET = 0;
 
     public CertificateService(CertificateDao dao) {
         this.dao = dao;
@@ -25,31 +25,35 @@ public class CertificateService {
         return dao.getCertificateById(id);
     }
 
-    public List<Certificate> getAllCertificates(int page) {
-        int start = calculateStartPage(page);
-        return dao.getAllCertificates(start,CERTIFICATES_ON_PAGE);
-    }
-    public List<Certificate> getAllCertificates() {
+    public List<Certificate> getAllCertificates(){
         return dao.getAllCertificates();
     }
 
-    public List<Certificate> getCertificatesWithParams(Set<Long> tagIdSet, Optional<String> part,
-                                                       Optional<String> nameSort,
-                                                       Optional<String> dateSort, int page) {
 
-        int start = calculateStartPage(page);
+    public List<Certificate> getAllCertificates(Set<Long> tagIdSet, Optional<String> part,
+                                                Optional<String> nameSort, Optional<String> dateSort,
+                                                Optional<Integer> limit, Optional<Integer> offset) {
+
+        int start = offset.orElse(DEFAULT_OFFSET);
+        int lim = limit.orElse(DEFAULT_LIMIT);
+        if (start < 0) {
+            start = DEFAULT_OFFSET;
+        }
+        if (lim <= 0) {
+            lim = DEFAULT_LIMIT;
+        }
         Set<Tag> tags = tagIdSet.stream()
                 .map(Tag::new)
                 .collect(Collectors.toSet());
-        return dao.getCertificatesWithParams(tags,part,nameSort,dateSort,start,CERTIFICATES_ON_PAGE);
+        return dao.getAllCertificates(tags, part, nameSort, dateSort, start, lim);
     }
 
-    private int calculateStartPage(int page){
+    private int calculateStartPage(int page) {
         page--;
-        if(page<0){
-            page=0;
+        if (page < 0) {
+            page = 0;
         }
-        return page * CERTIFICATES_ON_PAGE;
+        return page * DEFAULT_OFFSET;
     }
 
     public void deleteCertificate(Long id) {

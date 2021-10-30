@@ -1,4 +1,4 @@
-package com.epam.esm.dto;
+package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.Certificate;

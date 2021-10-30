@@ -51,9 +51,9 @@ public class TagController {
      * @return {@link List} of {@link Tag} entity objects from DB
      */
     @GetMapping
-    public List<Tag> getAllTags(@RequestParam(name = "page") Optional<Integer> optionalPage) {
-        int page = optionalPage.orElse(1);
-        return service.getAllTags(page);
+    public List<Tag> getAllTags(@RequestParam(name = "limit") Optional<Integer> limit,
+                                @RequestParam(name = "offset") Optional<Integer> offset) {
+        return service.getAllTags(limit, offset);
     }
 
     /**
