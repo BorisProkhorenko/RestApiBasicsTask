@@ -81,9 +81,10 @@ public class TagController {
                 .collect(Collectors.toList());
 
         buildTagCollectionLinks(tags);
+        Link mostUsedTag = linkTo(TagController.class).slash("highest-order").withRel(MOST_USED_TAG);
         Link link = linkTo(TagController.class).withSelfRel();
 
-        return CollectionModel.of(tags, link);
+        return CollectionModel.of(tags, mostUsedTag,link);
 
     }
 
@@ -130,7 +131,7 @@ public class TagController {
     }
 
     private void buildTagLinks(TagDto tag) {
-        Link mostUsedTag = linkTo(TagController.class).withRel(MOST_USED_TAG);
+        Link mostUsedTag = linkTo(TagController.class).slash("highest-order").withRel(MOST_USED_TAG);
         tag.add(mostUsedTag);
         Link allTags = linkTo(TagController.class).withRel(TAGS);
         tag.add(allTags);
