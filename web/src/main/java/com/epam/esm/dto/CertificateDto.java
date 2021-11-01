@@ -30,13 +30,13 @@ public class CertificateDto extends RepresentationModel<CertificateDto> {
     private String lastUpdateDate;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<Tag> tags;
+    private Set<TagDto> tags;
 
     public CertificateDto() {
     }
 
     public CertificateDto(long id, String name, String description, Double price, Integer duration,
-                          String createDate, String lastUpdateDate, Set<Tag> tags) {
+                          String createDate, String lastUpdateDate, Set<TagDto> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -103,25 +103,13 @@ public class CertificateDto extends RepresentationModel<CertificateDto> {
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public Set<Tag> getTags() {
+    public Set<TagDto> getTags() {
         return tags;
     }
 
-    public void setTags(Set<Tag> tags) {
+    public void setTags(Set<TagDto> tags) {
         this.tags = tags;
     }
 
-    @Override
-    public String toString() {
-        return "GiftCertificateDto{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", price=" + price +
-                ", duration=" + duration +
-                ", createDate='" + createDate + '\'' +
-                ", lastUpdateDate='" + lastUpdateDate + '\'' +
-                ", tags=" + tags +
-                '}';
-    }
+
 }

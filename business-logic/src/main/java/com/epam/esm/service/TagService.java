@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TagService {
+public class TagService extends AbstractService<Tag>{
 
 
     private final TagDao dao;
@@ -16,40 +16,21 @@ public class TagService {
     private final static int DEFAULT_OFFSET = 0;
 
     public TagService(TagDao dao) {
+        super(dao);
         this.dao = dao;
-    }
-
-
-    public Tag getTagById(Long id) {
-        return dao.getTagById(id);
-    }
-
-    public List<Tag> getAllTags(Optional<Integer> limit, Optional<Integer> offset) {
-
-        int start = offset.orElse(DEFAULT_OFFSET);
-        int lim = limit.orElse(DEFAULT_LIMIT);
-        if (start < 0) {
-            start = DEFAULT_OFFSET;
-        }
-        if (lim <= 0) {
-            lim = DEFAULT_LIMIT;
-        }
-
-        return dao.getAllTags(start, lim);
-    }
-
-    public void deleteTag(Long id) {
-        Tag tag = new Tag();
-        tag.setId(id);
-        dao.deleteTag(tag);
-    }
-
-    public Tag createTag(Tag tag) {
-        return dao.createTag(tag);
     }
 
     public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
         return dao.getMostUsedTagOfUserWithHighestOrdersCost();
     }
 
+    @Override
+    public int getDefaultOffset() {
+        return DEFAULT_OFFSET;
+    }
+
+    @Override
+    public int getDefaultLimit() {
+        return DEFAULT_LIMIT;
+    }
 }

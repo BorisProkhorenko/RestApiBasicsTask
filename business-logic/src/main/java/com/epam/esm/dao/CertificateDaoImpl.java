@@ -5,8 +5,6 @@ import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +16,8 @@ import java.util.*;
 
 @Repository
 @Transactional
-public class CertificateDaoImpl implements CertificateDao {
+public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
 
-    private final SessionFactory sessionFactory;
     private final TagDao tagDao;
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
@@ -30,13 +27,13 @@ public class CertificateDaoImpl implements CertificateDao {
     private static final String DESC = "desc";
 
     public CertificateDaoImpl(SessionFactory sessionFactory, TagDao tagDao) {
-        this.sessionFactory = sessionFactory;
+        super(sessionFactory);
         this.tagDao = tagDao;
     }
 
 
     @Override
-    public Certificate getCertificateById(Long id) {
+    public Certificate getById(Long id) {
         Certificate certificate = getCurrentSession().get(Certificate.class, id);
         if (certificate != null) {
             return certificate;
@@ -46,27 +43,22 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public List<Certificate> getAllCertificates(int start, int limit) {
-        return getAllCertificates(new HashSet<>(),Optional.empty(),Optional.empty(),
+    public List<Certificate> getAll(int start, int limit) {
+        return getAll(new HashSet<>(),Optional.empty(),Optional.empty(),
                 Optional.empty(),start,limit);
 
     }
 
-    @Override
-    public List<Certificate> getAllCertificates() {
-        return getAllCertificates(new HashSet<>(),Optional.empty(),Optional.empty(),
-                Optional.empty(),0,100000);
 
-    }
 
     @Override
-    public void deleteCertificate(Certificate certificate) {
+    public void delete(Certificate certificate) {
         getCurrentSession().delete(certificate);
     }
 
     @Override
-    public Certificate updateCertificate(Certificate certificate) {
-        Certificate certificateFromDb = getCertificateById(certificate.getId());
+    public Certificate update(Certificate certificate) {
+        Certificate certificateFromDb = getById(certificate.getId());
         certificate = mapFields(certificate, certificateFromDb);
 
         return (Certificate) getCurrentSession().merge(certificate);
@@ -93,7 +85,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
 
     @Override
-    public Certificate createCertificate(Certificate certificate) {
+    public Certificate create(Certificate certificate) {
         if (certificate.getTags() != null) {
             for (Tag t : certificate.getTags()) {
                 try {
@@ -109,19 +101,10 @@ public class CertificateDaoImpl implements CertificateDao {
         return certificate;
     }
 
-
-    public Session getCurrentSession() {
-        try {
-            return sessionFactory.getCurrentSession();
-        } catch (HibernateException e) {
-            return sessionFactory.openSession();
-        }
-    }
-
     @Override
-    public List<Certificate> getAllCertificates(Set<Tag> tagIdSet, Optional<String> part,
-                                                       Optional<String> nameSort, Optional<String> dateSort,
-                                                       int start, int limit) {
+    public List<Certificate> getAll(Set<Tag> tagIdSet, Optional<String> part,
+                                    Optional<String> nameSort, Optional<String> dateSort,
+                                    int start, int limit) {
         CriteriaBuilder cb = getCurrentSession().getCriteriaBuilder();
         CriteriaQuery<Certificate> cq = cb.createQuery(Certificate.class);
         filter(cq, tagIdSet, part);

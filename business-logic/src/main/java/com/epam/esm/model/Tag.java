@@ -1,10 +1,9 @@
 package com.epam.esm.model;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -13,9 +12,8 @@ import java.util.Objects;
 @AuditTable("tag_audit")
 @Table(name ="tag")
 @Audited
-public class Tag {
+public class Tag implements Identifiable{
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

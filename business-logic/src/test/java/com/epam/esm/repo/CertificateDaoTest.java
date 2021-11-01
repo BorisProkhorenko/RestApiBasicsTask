@@ -44,8 +44,8 @@ public class CertificateDaoTest {
         //given
         Certificate certificate = new Certificate("name", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
-        Certificate certificateFromDb = dao.getCertificateById(1L);
+        dao.create(certificate);
+        Certificate certificateFromDb = dao.getById(1L);
         //then
         Assertions.assertEquals("name", certificateFromDb.getName());
     }
@@ -55,8 +55,8 @@ public class CertificateDaoTest {
         //given
         Certificate certificate = new Certificate("name", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
-        List<Certificate> certificates = dao.getAllCertificates();
+        dao.create(certificate);
+        List<Certificate> certificates = dao.getAll(0,5);
         //then
         Assertions.assertEquals(1, certificates.size());
     }
@@ -66,12 +66,12 @@ public class CertificateDaoTest {
         //given
         Certificate certificate = new Certificate("name", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
+        dao.create(certificate);
         certificate.setId(1L);
-        dao.deleteCertificate(certificate);
+        dao.delete(certificate);
         //then
         Assertions.assertThrows(CertificateNotFoundException.class, () ->
-                dao.getCertificateById(1L));
+                dao.getById(1L));
     }
 
     @Test
@@ -80,9 +80,9 @@ public class CertificateDaoTest {
         Certificate certificate = new Certificate("name", "description", 3, 5);
         Certificate updated = new Certificate(1L, "updated", null, 3, 5);
         //when
-        dao.createCertificate(certificate);
-        dao.updateCertificate(updated);
-        Certificate certificateFromDb = dao.getCertificateById(1L);
+        dao.create(certificate);
+        dao.update(updated);
+        Certificate certificateFromDb = dao.getById(1L);
         //then
         Assertions.assertEquals("updated", certificateFromDb.getName());
         Assertions.assertEquals("description", certificateFromDb.getDescription());
@@ -94,10 +94,10 @@ public class CertificateDaoTest {
         Certificate certificate = new Certificate("name", "description", 3, 5);
         Certificate updated = new Certificate("updated", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
+        dao.create(certificate);
         //then
         Assertions.assertThrows(CertificateNotFoundException.class, () ->
-                dao.updateCertificate(updated));
+                dao.update(updated));
     }
 
     @Test
@@ -108,8 +108,8 @@ public class CertificateDaoTest {
         tags.add(new Tag("tag"));
         certificate.setTags(tags);
         //when
-        dao.createCertificate(certificate);
-        Certificate certificateFromDB = dao.getCertificateById(1L);
+        dao.create(certificate);
+        Certificate certificateFromDB = dao.getById(1L);
         //then
         Assertions.assertEquals(1, certificateFromDB.getTags().size());
     }
@@ -127,10 +127,10 @@ public class CertificateDaoTest {
         certificate.setTags(tags);
         updated.setTags(tagsUpdated);
         //when
-        dao.createCertificate(certificate);
-        System.out.println(dao.getAllCertificates());
-        dao.updateCertificate(updated);
-        Certificate certificateFromDB = dao.getCertificateById(1L);
+        dao.create(certificate);
+        System.out.println(dao.getAll(0,5));
+        dao.update(updated);
+        Certificate certificateFromDB = dao.getById(1L);
         //then
         Assertions.assertEquals(2, certificateFromDB.getTags().size());
     }

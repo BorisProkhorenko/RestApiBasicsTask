@@ -7,17 +7,21 @@ import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
 import java.util.*;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = RepoApplication.class)
+@ActiveProfiles("test")
 public class CertificateServiceTest {
 
     private static CertificateService service;
@@ -28,11 +32,11 @@ public class CertificateServiceTest {
     @BeforeAll
     public static void init() {
         CertificateDao mockDao = Mockito.mock(CertificateDao.class);
-        when(mockDao.getCertificateById(anyLong()))
+        when(mockDao.getById(anyLong()))
                 .thenReturn(MOCK_CERTIFICATE);
-        when(mockDao.createCertificate(any()))
+        when(mockDao.create(any()))
                 .thenReturn(MOCK_CERTIFICATE);
-        when(mockDao.updateCertificate(any()))
+        when(mockDao.update(any()))
                 .thenReturn(MOCK_CERTIFICATE);
         Certificate certificate1 = new Certificate("name", "description", 4, 4);
         Tag tag = new Tag(1L, "tag");
@@ -45,7 +49,7 @@ public class CertificateServiceTest {
         certificate2.setTags(emptySet);
 
         List<Certificate> certificates = Arrays.asList(MOCK_CERTIFICATE, certificate2, certificate1);
-        when(mockDao.getAllCertificates())
+        when(mockDao.getAll(anyInt(),anyInt()))
                 .thenReturn(certificates);
 
 
@@ -56,7 +60,7 @@ public class CertificateServiceTest {
     @Test
     public void testGetAll() {
         //when
-        List<Certificate> certificates = service.getAllCertificates();
+        List<Certificate> certificates = service.getAll(Optional.empty(),Optional.empty());
         //then
         Assertions.assertNotNull(certificates);
     }
@@ -64,7 +68,7 @@ public class CertificateServiceTest {
     @Test
     public void testGetById() {
         //when
-        Certificate certificate = service.getCertificateById(1L);
+        Certificate certificate = service.getById(1L);
         //then
         Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
     }
@@ -72,7 +76,7 @@ public class CertificateServiceTest {
     @Test
     public void testCreate() {
         //when
-        Certificate certificate = service.createCertificate(MOCK_CERTIFICATE);
+        Certificate certificate = service.create(MOCK_CERTIFICATE);
         //then
         Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
     }
@@ -80,142 +84,10 @@ public class CertificateServiceTest {
     @Test
     public void testUpdate() {
         //when
-        Certificate certificate = service.updateCertificate(MOCK_CERTIFICATE);
+        Certificate certificate = service.update(MOCK_CERTIFICATE);
         //then
         Assertions.assertEquals(certificate, MOCK_CERTIFICATE);
     }
-
-/*
-    @Test
-    public void testGetWithParamsWhenFilteredByTag() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.of("1"), Optional.empty(),
-                Optional.empty(), Optional.empty());
-        //then
-        Assertions.assertEquals(1, certificates.size());
-    }
-
-    @Test
-    public void testGetWithParamsWhenFilteredByNoExistedTag() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.of("2"), Optional.empty(),
-                Optional.empty(), Optional.empty());
-        //then
-        Assertions.assertEquals(0, certificates.size());
-    }
-
-    @Test
-    public void testGetWithParamsWhenFilteredByPart() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.of("es"),
-                Optional.empty(), Optional.empty());
-        //then
-        Assertions.assertEquals(2, certificates.size());
-    }
-
-    @Test
-    public void testGetWithParamsWhenFilteredByNotExistedPart() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.of("b"),
-                Optional.empty(), Optional.empty());
-        //then
-        Assertions.assertEquals(0, certificates.size());
-    }
-
-    @Test
-    public void testGetWithParamsWhenSortedByNameAsc() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                Optional.of("asc"), Optional.empty());
-        //then
-        Assertions.assertEquals(MOCK, certificates.get(0).getName());
-    }
-
-    @Test
-    public void testGetWithParamsWhenSortedByNameDesc() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                Optional.of("desc"), Optional.empty());
-        //then
-        Assertions.assertEquals("test", certificates.get(0).getName());
-    }
-
-    @Test
-    public void testGetWithParamsWhenSortedByDescriptionAsc() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.of("asc"));
-        //then
-        Assertions.assertEquals("description", certificates.get(0).getDescription());
-    }
-
-    @Test
-    public void testGetWithParamsWhenSortedByDescriptionDesc() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.of("desc"));
-        //then
-        Assertions.assertEquals("test", certificates.get(0).getDescription());
-    }
-
-    @Test
-    public void testGetWithParamsWhenSortedByNameDifferent() {
-        //when
-        Assertions.assertThrows(InvalidRequestException.class, () ->
-                service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                        Optional.of("faldsdse"), Optional.empty()));
-
-    }
-
-
-    @Test
-    public void testGetWithParamsWhenSortedByDescriptionDifferent() {
-        //when
-        Assertions.assertThrows(InvalidRequestException.class, () ->
-                service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                        Optional.empty(), Optional.of("faldsdse")));
-
-    }
-
-
-    @Test
-    public void testGetWithParamsWhenAllParamsEmpty() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty());
-        //then
-        Assertions.assertEquals(MOCK, certificates.get(0).getName());
-        Assertions.assertEquals(3, certificates.size());
-    }
-
-    @Test
-    public void testGetWithParamsWhenSortedByBoth() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.empty(), Optional.empty(),
-                Optional.of("asc"), Optional.of("desc"));
-        //then
-        Assertions.assertEquals("test", certificates.get(0).getDescription());
-    }
-
-    @Test
-    public void testGetWithParamsWhenFilteredByTagAndPart() {
-        //when
-        List<GiftCertificate> certificates = service.getCertificatesWithParams(Optional.of("1"), Optional.of("es"),
-                Optional.empty(), Optional.empty());
-        //then
-        Assertions.assertEquals(1, certificates.size());
-    }
-
-    @Test
-    public void testGetWithParamsWhenInvalidIdArgument() {
-        //when
-        Assertions.assertThrows(InvalidRequestException.class, () ->
-                service.getCertificatesWithParams(Optional.of("1L"), Optional.of("es"),
-                        Optional.empty(), Optional.empty()));
-
-    }
-
- */
 
 
 }

@@ -2,8 +2,6 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Tag;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
@@ -14,20 +12,18 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class TagDaoImpl implements TagDao {
+public class TagDaoImpl extends AbstractDao implements TagDao {
 
-
-    private final SessionFactory sessionFactory;
     private static final String HQL_GET_TAG_BY_ORDERS =" select tag FROM User u join u.orders o" +
             " join o.certificates c join c.tags tag group by tag.id order by" +
             " sum(o.cost) desc";
 
     public TagDaoImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+        super(sessionFactory);
     }
 
     @Override
-    public Tag getTagById(Long id) {
+    public Tag getById(Long id) {
         Tag tag = getCurrentSession().get(Tag.class, id);
         if (tag != null) {
             return tag;
@@ -52,7 +48,7 @@ public class TagDaoImpl implements TagDao {
 
 
     @Override
-    public List<Tag> getAllTags(int start, int limit) {
+    public List<Tag> getAll(int start, int limit) {
         return getCurrentSession().createQuery("from Tag")
                 .setFirstResult(start)
                 .setMaxResults(limit)
@@ -60,13 +56,13 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public void deleteTag(Tag tag) {
+    public void delete(Tag tag) {
         getCurrentSession().delete(tag);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Tag createTag(Tag tag) {
+    public Tag create(Tag tag) {
         try {
             getTagByName(tag.getName());
         } catch (TagNotFoundException ex) {
@@ -82,11 +78,4 @@ public class TagDaoImpl implements TagDao {
                 .uniqueResult();
     }
 
-    public Session getCurrentSession() {
-        try {
-            return sessionFactory.getCurrentSession();
-        } catch (HibernateException e) {
-            return sessionFactory.openSession();
-        }
-    }
 }

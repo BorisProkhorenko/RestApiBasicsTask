@@ -2,19 +2,9 @@ package com.epam.esm.dao;
 
 import com.epam.esm.model.User;
 
-import java.util.List;
 
-public interface UserDao {
-
-    User getUserById(Long id);
+public interface UserDao extends Dao<User>{
 
     User getUserByUsername(String username);
-
-    List<User> getAllUsers(int start, int limit);
-
-    User createUser(User user);
-
-
-    void deleteUser(User user);
 
 }

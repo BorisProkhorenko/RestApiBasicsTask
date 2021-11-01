@@ -8,19 +8,27 @@ import com.epam.esm.service.CertificateService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
 /**
  * This Controller provides public API for operations with {@link Certificate} entity.
  * Uses {@link CertificateService} to access Data Base through business-logic layer.
  * Uses {@link ObjectMapper} to map objects from JSON
+ * Uses {@link CertificateDtoMapper} to map objects from Entity to Dto
  *
  * @author Boris Prokhorenko
  * @see CertificateService
+ * @see CertificateDto
  * @see Certificate
+ * @see CertificateDto
+ * @see CertificateDtoMapper
  * @see ObjectMapper
  */
 @RestController
@@ -30,7 +38,9 @@ public class CertificateController {
     private final CertificateService service;
     private final ObjectMapper objectMapper;
     private final CertificateDtoMapper dtoMapper;
+
     private final static String DELIMITER = ",";
+    private final static String CERTIFICATES = "certificates";
 
     public CertificateController(CertificateService service, ObjectMapper objectMapper,
                                  CertificateDtoMapper dtoMapper, Jdk8Module jdk8Module) {
@@ -48,8 +58,9 @@ public class CertificateController {
      */
     @GetMapping(value = "/{id}")
     public CertificateDto getCertificateById(@PathVariable Long id) {
-
-        return dtoMapper.toDto(service.getCertificateById(id));
+        CertificateDto certificate = dtoMapper.toDto(service.getById(id));
+        buildCertificateLinks(certificate);
+        return certificate;
     }
 
 
@@ -67,7 +78,9 @@ public class CertificateController {
                     || certificate.getPrice() == null || certificate.getDuration() == null) {
                 throw new InvalidRequestException("Empty field");
             }
-            return dtoMapper.toDto(service.createCertificate(certificate));
+            CertificateDto certificateDto = dtoMapper.toDto(service.create(certificate));
+            buildCertificateLinks(certificateDto);
+            return certificateDto;
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
@@ -80,7 +93,7 @@ public class CertificateController {
      */
     @DeleteMapping(value = "/{id}")
     public void deleteCertificate(@PathVariable Long id) {
-        service.deleteCertificate(id);
+        service.delete(new Certificate(id));
     }
 
 
@@ -97,7 +110,9 @@ public class CertificateController {
             if (certificate.getId() == 0) {
                 throw new InvalidRequestException("id = 0");
             }
-            return dtoMapper.toDto(service.updateCertificate(certificate));
+            CertificateDto certificateDto = dtoMapper.toDto(service.update(certificate));
+            buildCertificateLinks(certificateDto);
+            return certificateDto;
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
@@ -106,26 +121,48 @@ public class CertificateController {
     /**
      * Method allows getting {@link Certificate} objects from db filtered and/or sorted
      *
-     * @return @return {@link List} of {@link CertificateDto} DTO of entity objects from DB
+     *@param limit - count of displayed dto objects
+     *@param offset - count of skipped dto objects
+     *@param tags - filtering by tags id (id numbers must be separated by delimiter "," without any spaces)
+     *@param part - filtering by part of certificate name or description
+     *@param name - sorting by name(asc/desc)
+     *@param date - sorting by date of the last update(asc/desc)
+     *
+     * @return @return {@link CollectionModel} of {@link CertificateDto} DTO of entity objects from DB
      */
-    @GetMapping
-    public List<CertificateDto> getAllCertificates(@RequestParam(name = "limit") Optional<Integer> limit,
-                                                          @RequestParam(name = "offset") Optional<Integer> offset,
-                                                          @RequestParam(name = "filter_by_tags") Optional<String> tags,
-                                                          @RequestParam(name = "filter_by_part") Optional<String> part,
-                                                          @RequestParam(name = "sort_by_name") Optional<String> name,
-                                                          @RequestParam(name = "sort_by_date") Optional<String> date) {
+    @GetMapping(produces = {"application/hal+json"})
+    public CollectionModel<CertificateDto> getAllCertificates(@RequestParam(name = "limit") Optional<Integer> limit,
+                                                              @RequestParam(name = "offset") Optional<Integer> offset,
+                                                              @RequestParam(name = "filter_by_tags") Optional<String> tags,
+                                                              @RequestParam(name = "filter_by_part") Optional<String> part,
+                                                              @RequestParam(name = "sort_by_name") Optional<String> name,
+                                                              @RequestParam(name = "sort_by_date") Optional<String> date) {
 
         Set<Long> tagIdSet = new HashSet<>();
         if (tags.isPresent()) {
             tagIdSet = parseTagIdParam(tags.get());
         }
-
-        return service.getAllCertificates(tagIdSet, part,
+        List<CertificateDto> certificates = service.getAll(tagIdSet, part,
                         name, date, limit, offset)
                 .stream()
                 .map(dtoMapper::toDto)
                 .collect(Collectors.toList());
+        buildCertificateCollectionLinks(certificates);
+        Link link = linkTo(CertificateController.class).withSelfRel();
+        return CollectionModel.of(certificates, link);
+
+
+    }
+
+    /*package-private*/
+    static void buildCertificateCollectionLinks(Iterable<CertificateDto> certificates) {
+
+        for (CertificateDto certificate : certificates) {
+            TagController.buildTagCollectionLinks(certificate.getTags());
+            Long id = certificate.getId();
+            Link selfLink = linkTo(CertificateController.class).slash(id).withSelfRel();
+            certificate.add(selfLink);
+        }
 
 
     }
@@ -135,6 +172,15 @@ public class CertificateController {
         return Arrays.stream(params)
                 .map(Long::parseLong)
                 .collect(Collectors.toSet());
+    }
+
+    private void buildCertificateLinks(CertificateDto certificate) {
+        TagController.buildTagCollectionLinks(certificate.getTags());
+        Link allCertificates = linkTo(CertificateController.class).withRel(CERTIFICATES);
+        certificate.add(allCertificates);
+        Long id = certificate.getId();
+        Link selfLink = linkTo(CertificateController.class).slash(id).withSelfRel();
+        certificate.add(selfLink);
     }
 
 

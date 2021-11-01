@@ -1,6 +1,7 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.model.Certificate;
+import com.epam.esm.model.Order;
 import com.epam.esm.model.Tag;
 
 
@@ -9,23 +10,13 @@ import java.util.Optional;
 import java.util.Set;
 
 
-public interface CertificateDao {
+public interface CertificateDao extends Dao<Certificate>{
 
-    Certificate getCertificateById(Long id);
+    Certificate update(Certificate certificate);
 
-    List<Certificate> getAllCertificates(int start, int limit);
-
-    List<Certificate> getAllCertificates();
-
-    void deleteCertificate(Certificate certificate);
-
-    Certificate updateCertificate(Certificate certificate);
-
-    Certificate createCertificate(Certificate certificate);
-
-    List<Certificate> getAllCertificates(Set<Tag> tagIdSet, Optional<String> part,
-                                                Optional<String> nameSort, Optional<String> dateSort,
-                                                int start, int limit);
+    List<Certificate> getAll(Set<Tag> tagIdSet, Optional<String> part,
+                             Optional<String> nameSort, Optional<String> dateSort,
+                             int start, int limit);
 
 
 

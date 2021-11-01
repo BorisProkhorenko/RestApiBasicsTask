@@ -12,7 +12,7 @@ import java.util.*;
 @Entity
 @Table(name = "`order`")
 @Audited
-public class Order {
+public class Order implements Identifiable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,11 +44,16 @@ public class Order {
     public Order() {
     }
 
+    public Order(long id) {
+        this.id = id;
+    }
+
     public Order(long id, User user, List<Certificate> certificates) {
         this.id = id;
         this.user = user;
         this.certificates = certificates;
     }
+
 
     public long getId() {
         return id;

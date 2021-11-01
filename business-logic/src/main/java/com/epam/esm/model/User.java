@@ -13,7 +13,7 @@ import java.util.Set;
 @AuditTable("user_audit")
 @Table(name ="`user`")
 @Audited
-public class User {
+public class User implements Identifiable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

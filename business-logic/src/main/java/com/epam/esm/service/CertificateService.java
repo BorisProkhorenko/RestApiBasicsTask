@@ -11,63 +11,43 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class CertificateService {
+public class CertificateService extends AbstractService<Certificate>{
 
     private final CertificateDao dao;
     private final static int DEFAULT_LIMIT = 5;
     private final static int DEFAULT_OFFSET = 0;
 
     public CertificateService(CertificateDao dao) {
+        super(dao);
         this.dao = dao;
     }
 
-    public Certificate getCertificateById(Long id) {
-        return dao.getCertificateById(id);
-    }
 
-    public List<Certificate> getAllCertificates(){
-        return dao.getAllCertificates();
-    }
+    public List<Certificate> getAll(Set<Long> tagIdSet, Optional<String> part,
+                                    Optional<String> nameSort, Optional<String> dateSort,
+                                    Optional<Integer> limit, Optional<Integer> offset) {
 
-
-    public List<Certificate> getAllCertificates(Set<Long> tagIdSet, Optional<String> part,
-                                                Optional<String> nameSort, Optional<String> dateSort,
-                                                Optional<Integer> limit, Optional<Integer> offset) {
-
-        int start = offset.orElse(DEFAULT_OFFSET);
-        int lim = limit.orElse(DEFAULT_LIMIT);
-        if (start < 0) {
-            start = DEFAULT_OFFSET;
-        }
-        if (lim <= 0) {
-            lim = DEFAULT_LIMIT;
-        }
+        int start = getStart(offset);
+        int lim = getLimit(limit);
         Set<Tag> tags = tagIdSet.stream()
                 .map(Tag::new)
                 .collect(Collectors.toSet());
-        return dao.getAllCertificates(tags, part, nameSort, dateSort, start, lim);
+        return dao.getAll(tags, part, nameSort, dateSort, start, lim);
     }
 
-    private int calculateStartPage(int page) {
-        page--;
-        if (page < 0) {
-            page = 0;
-        }
-        return page * DEFAULT_OFFSET;
+
+    public Certificate update(Certificate certificate) {
+        return dao.update(certificate);
     }
 
-    public void deleteCertificate(Long id) {
-        Certificate certificate = new Certificate();
-        certificate.setId(id);
-        dao.deleteCertificate(certificate);
+    @Override
+    public int getDefaultOffset() {
+        return DEFAULT_OFFSET;
     }
 
-    public Certificate updateCertificate(Certificate certificate) {
-        return dao.updateCertificate(certificate);
-    }
-
-    public Certificate createCertificate(Certificate certificate) {
-        return dao.createCertificate(certificate);
+    @Override
+    public int getDefaultLimit() {
+        return DEFAULT_LIMIT;
     }
 
 

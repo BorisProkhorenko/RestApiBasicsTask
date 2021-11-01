@@ -1,10 +1,6 @@
 package com.epam.esm.model;
 
 
-import org.hibernate.envers.AuditTable;
-import org.hibernate.envers.Audited;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import javax.persistence.*;
 import java.util.Objects;
 

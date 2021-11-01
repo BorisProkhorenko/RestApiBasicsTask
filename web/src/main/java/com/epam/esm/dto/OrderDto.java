@@ -5,12 +5,12 @@ import com.epam.esm.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
-public class OrderDto {
+public class OrderDto extends RepresentationModel<CertificateDto> {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     @Id
@@ -27,12 +27,12 @@ public class OrderDto {
     private Double cost;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<Certificate> certificates;
+    private List<CertificateDto> certificates;
 
     public OrderDto() {
     }
 
-    public OrderDto(long id, User user, String updateDate, Double cost, List<Certificate> certificates) {
+    public OrderDto(long id, User user, String updateDate, Double cost, List<CertificateDto> certificates) {
         this.id = id;
         this.user = user;
         this.updateDate = updateDate;
@@ -74,30 +74,13 @@ public class OrderDto {
         this.cost = cost;
     }
 
-    public List<Certificate> getCertificates() {
+    public List<CertificateDto> getCertificates() {
         return certificates;
     }
 
-    public void setCertificates(List<Certificate> certificates) {
+    public void setCertificates(List<CertificateDto> certificates) {
         this.certificates = certificates;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Order{");
-        builder.append("id=" + id);
-        if(user != null){
-            builder.append(", user id=" + user.getId());
-            if(user.getUsername()!=null){
-                builder.append(", user=" + user.getUsername());
-            }
-        }
-        builder.append(", updateDate=" + updateDate);
-        builder.append(", cost=" + cost);
-        builder.append(", certificates=" + certificates);
-        builder.append('}');
-        return builder.toString();
-    }
 
 }

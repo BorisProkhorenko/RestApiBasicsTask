@@ -2,6 +2,7 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.exceptions.UserNotFoundException;
+import com.epam.esm.model.Identifiable;
 import com.epam.esm.model.Tag;
 import com.epam.esm.model.User;
 import org.hibernate.HibernateException;
@@ -16,17 +17,15 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class UserDaoImpl implements UserDao{
+public class UserDaoImpl extends AbstractDao implements UserDao{
 
-
-    private final SessionFactory sessionFactory;
 
     public UserDaoImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+        super(sessionFactory);
     }
 
     @Override
-    public User getUserById(Long id) {
+    public User getById(Long id) {
         User user = getCurrentSession().get(User.class, id);
         if (user != null) {
             return user;
@@ -49,7 +48,7 @@ public class UserDaoImpl implements UserDao{
     }
 
     @Override
-    public List<User> getAllUsers(int start, int limit) {
+    public List<User> getAll(int start, int limit) {
         return getCurrentSession().createQuery("from User")
                 .setFirstResult(start)
                 .setMaxResults(limit)
@@ -57,7 +56,7 @@ public class UserDaoImpl implements UserDao{
     }
 
     @Override
-    public User createUser(User user) {
+    public User create(User user) {
         try {
             getUserByUsername(user.getUsername());
         } catch (UserNotFoundException ex) {
@@ -67,18 +66,8 @@ public class UserDaoImpl implements UserDao{
     }
 
     @Override
-    public void deleteUser(User user) {
+    public void delete(User user) {
         getCurrentSession().delete(user);
     }
-
-    public Session getCurrentSession() {
-        try {
-            return sessionFactory.getCurrentSession();
-        } catch (HibernateException e) {
-            return sessionFactory.openSession();
-        }
-    }
-
-
 
 }

@@ -3,8 +3,6 @@ package com.epam.esm.model;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.envers.AuditJoinTable;
-import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -17,7 +15,7 @@ import java.util.Set;
 @Entity
 @Table(name = "gift_certificate")
 @Audited
-public class Certificate {
+public class Certificate implements Identifiable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

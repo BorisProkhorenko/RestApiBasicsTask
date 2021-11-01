@@ -2,10 +2,11 @@ package com.epam.esm.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
 
-public class UserDto {
+public class UserDto extends RepresentationModel<UserDto> {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;
@@ -48,12 +49,5 @@ public class UserDto {
         this.orders = orders;
     }
 
-    @Override
-    public String toString() {
-        return "UserDto{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", orderDtoSet=" + orders +
-                '}';
-    }
+
 }

@@ -17,23 +17,20 @@ import java.util.stream.Collectors;
 
 @Repository
 @Transactional
-public class OrderDaoImpl implements OrderDao {
+public class OrderDaoImpl extends AbstractDao implements OrderDao {
 
-
-    private final SessionFactory sessionFactory;
     private final CertificateDao certificateDao;
     private final CertificateJsonMapper jsonMapper;
 
 
     public OrderDaoImpl(SessionFactory sessionFactory, CertificateDao certificateDao, CertificateJsonMapper jsonMapper) {
-        this.sessionFactory = sessionFactory;
+        super(sessionFactory);
         this.certificateDao = certificateDao;
         this.jsonMapper = jsonMapper;
     }
 
-
     @Override
-    public Order getOrderById(Long id) {
+    public Order getById(Long id) {
         Order order = getCurrentSession().get(Order.class, id);
         if (order != null) {
             mapSnapshots(order);
@@ -44,20 +41,29 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
-    public List<Order> getAllOrders() {
-        List<Order> orders = getCurrentSession().createQuery("from Order ").list();
+    public List<Order> getAll(int start, int limit) {
+        List<Order> orders = getCurrentSession().createQuery("from Order ")
+                .setFirstResult(start)
+                .setMaxResults(limit)
+                .list();
         return orders.stream()
                 .peek(this::mapSnapshots)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Order createOrder(Order order) {
+    public Order create(Order order) {
         verifyCertificatesWithDb(order);
         createSnapshots(order);
         mapCost(order);
         getCurrentSession().save(order);
         return order;
+    }
+
+
+    @Override
+    public void delete(Order order) {
+        getCurrentSession().delete(order);
     }
 
     private void mapCost(Order order) {
@@ -78,7 +84,7 @@ public class OrderDaoImpl implements OrderDao {
             List<Certificate> certificatesFromDb = new ArrayList<>();
             for (Certificate cert : order.getCertificates()) {
 
-                cert = certificateDao.getCertificateById(cert.getId());
+                cert = certificateDao.getById(cert.getId());
                 certificatesFromDb.add(cert);
             }
             order.setCertificates(certificatesFromDb);
@@ -106,16 +112,6 @@ public class OrderDaoImpl implements OrderDao {
         order.setCertificates(certificates);
     }
 
-    @Override
-    public void deleteOrder(Order order) {
-        getCurrentSession().delete(order);
-    }
 
-    public Session getCurrentSession() {
-        try {
-            return sessionFactory.getCurrentSession();
-        } catch (HibernateException e) {
-            return sessionFactory.openSession();
-        }
-    }
+
 }
