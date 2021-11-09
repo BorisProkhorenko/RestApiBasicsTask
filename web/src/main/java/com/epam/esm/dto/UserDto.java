@@ -3,9 +3,11 @@ package com.epam.esm.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import java.util.Set;
 
+@Relation(collectionRelation = "users", itemRelation = "user")
 public class UserDto extends RepresentationModel<UserDto> {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)

@@ -1,6 +1,5 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
 import org.springframework.stereotype.Component;
 

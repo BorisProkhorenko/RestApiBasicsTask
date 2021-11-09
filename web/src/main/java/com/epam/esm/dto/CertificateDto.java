@@ -1,11 +1,13 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.model.Tag;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import java.util.Set;
 
+@Relation(collectionRelation = "certificates", itemRelation = "certificate")
 public class CertificateDto extends RepresentationModel<CertificateDto> {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)

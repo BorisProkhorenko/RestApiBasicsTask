@@ -3,7 +3,6 @@ package com.epam.esm.dto;
 import com.epam.esm.model.Certificate;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

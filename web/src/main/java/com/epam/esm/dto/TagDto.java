@@ -2,8 +2,9 @@ package com.epam.esm.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
-
+@Relation(collectionRelation = "tags", itemRelation = "tag")
 public class TagDto extends RepresentationModel<TagDto> {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)

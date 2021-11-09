@@ -44,11 +44,10 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
 
     @Override
     public List<Certificate> getAll(int start, int limit) {
-        return getAll(new HashSet<>(),Optional.empty(),Optional.empty(),
-                Optional.empty(),start,limit);
+        return getAll(new HashSet<>(), Optional.empty(), Optional.empty(),
+                Optional.empty(), start, limit);
 
     }
-
 
 
     @Override
@@ -107,15 +106,12 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
                                     int start, int limit) {
         CriteriaBuilder cb = getCurrentSession().getCriteriaBuilder();
         CriteriaQuery<Certificate> cq = cb.createQuery(Certificate.class);
-        filter(cq, tagIdSet, part);
-
+        Root<Certificate> root = cq.from(Certificate.class);
+        filter(cq, root, tagIdSet, part);
         List<Order> orderList = new ArrayList<>();
-
-        nameSort.ifPresent(s -> sort(orderList,cq, s, NAME));
-        dateSort.ifPresent(s -> sort(orderList,cq, s, DATE));
-
+        nameSort.ifPresent(s -> sort(orderList, root, cq, s, NAME));
+        dateSort.ifPresent(s -> sort(orderList, root, cq, s, DATE));
         cq.orderBy(orderList);
-
         return getCurrentSession().createQuery(cq)
                 .setFirstResult(start)
                 .setMaxResults(limit)
@@ -123,9 +119,8 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
 
     }
 
-    private void filter(CriteriaQuery<Certificate> cq, Set<Tag> tagIdSet, Optional<String> part) {
+    private void filter(CriteriaQuery<Certificate> cq, Root<Certificate> root, Set<Tag> tagIdSet, Optional<String> part) {
         CriteriaBuilder cb = getCurrentSession().getCriteriaBuilder();
-        Root<Certificate> root = cq.from(Certificate.class);
         Expression<Set<Tag>> tags = root.get(TAGS);
         Predicate predicate = cb.conjunction();
         if (!tagIdSet.isEmpty()) {
@@ -144,9 +139,8 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
 
     }
 
-    private void sort(List<Order> orderList,CriteriaQuery<Certificate> cq, String sortOrder, String rootField) {
+    private void sort(List<Order> orderList, Root<Certificate> root, CriteriaQuery<Certificate> cq, String sortOrder, String rootField) {
         CriteriaBuilder cb = getCurrentSession().getCriteriaBuilder();
-        Root<Certificate> root = cq.from(Certificate.class);
         if (sortOrder.equalsIgnoreCase(ASC)) {
             orderList.add((cb.asc(root.get(rootField))));
         } else if (sortOrder.equalsIgnoreCase(DESC)) {
