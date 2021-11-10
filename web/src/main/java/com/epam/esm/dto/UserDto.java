@@ -8,7 +8,7 @@ import org.springframework.hateoas.server.core.Relation;
 import java.util.Set;
 
 @Relation(collectionRelation = "users", itemRelation = "user")
-public class UserDto extends RepresentationModel<UserDto> {
+public class UserDto extends RepresentationModel<UserDto> implements Dto {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;

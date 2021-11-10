@@ -3,8 +3,6 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.OrderNotFoundException;
 import com.epam.esm.model.*;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import org.springframework.stereotype.Repository;
@@ -60,6 +58,13 @@ public class OrderDaoImpl extends AbstractDao implements OrderDao {
         return order;
     }
 
+    @Override
+    public long getCount() {
+        return (long) getCurrentSession()
+                .createQuery("select count(o) from Order o")
+                .uniqueResult();
+    }
+
 
     @Override
     public void delete(Order order) {
@@ -92,26 +97,25 @@ public class OrderDaoImpl extends AbstractDao implements OrderDao {
 
     }
 
-    private void createSnapshots(Order order){
+    private void createSnapshots(Order order) {
         List<OrderCertificate> orderCertificates = new ArrayList<>();
-        for (Certificate certificate: order.getCertificates()) {
+        for (Certificate certificate : order.getCertificates()) {
             String snapshot = jsonMapper.toJson(certificate);
-            OrderCertificate orderCertificate = new OrderCertificate(order,certificate,snapshot);
+            OrderCertificate orderCertificate = new OrderCertificate(order, certificate, snapshot);
             orderCertificates.add(orderCertificate);
         }
         order.setSnapshots(orderCertificates);
     }
 
-    private void mapSnapshots(Order order){
+    private void mapSnapshots(Order order) {
         List<Certificate> certificates = new ArrayList<>();
-        for (OrderCertificate orderCertificate: order.getSnapshots()) {
+        for (OrderCertificate orderCertificate : order.getSnapshots()) {
             String snapshot = orderCertificate.getSnapshot();
             Certificate certificate = jsonMapper.fromJson(snapshot);
             certificates.add(certificate);
         }
         order.setCertificates(certificates);
     }
-
 
 
 }

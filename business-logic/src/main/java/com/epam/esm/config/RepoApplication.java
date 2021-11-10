@@ -2,6 +2,7 @@ package com.epam.esm.config;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.CertificateDaoImpl;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.UserDaoImpl;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
@@ -33,15 +34,15 @@ import java.util.*;
         HibernateJpaAutoConfiguration.class})
 @ComponentScan("com.epam.esm")
 @EnableTransactionManagement
-public class RepoApplication  {
+public class RepoApplication {
 
     @Autowired
     private Environment env;
 
+
     public static void main(String[] args) {
         SpringApplication.run(RepoApplication.class, args);
     }
-
 
     @Bean(name = "dataSource")
     public DataSource getDataSource() {

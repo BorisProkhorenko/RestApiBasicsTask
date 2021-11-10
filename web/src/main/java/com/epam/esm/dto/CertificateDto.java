@@ -8,7 +8,7 @@ import org.springframework.hateoas.server.core.Relation;
 import java.util.Set;
 
 @Relation(collectionRelation = "certificates", itemRelation = "certificate")
-public class CertificateDto extends RepresentationModel<CertificateDto> {
+public class CertificateDto extends RepresentationModel<CertificateDto> implements Dto {
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;

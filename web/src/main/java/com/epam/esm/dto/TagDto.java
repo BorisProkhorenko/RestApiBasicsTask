@@ -5,7 +5,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 @Relation(collectionRelation = "tags", itemRelation = "tag")
-public class TagDto extends RepresentationModel<TagDto> {
+public class TagDto extends RepresentationModel<TagDto> implements Dto{
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;

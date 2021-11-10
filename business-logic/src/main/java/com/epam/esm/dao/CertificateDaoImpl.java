@@ -109,14 +109,21 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
         Root<Certificate> root = cq.from(Certificate.class);
         filter(cq, root, tagIdSet, part);
         List<Order> orderList = new ArrayList<>();
-        nameSort.ifPresent(s -> sort(orderList, root, cq, s, NAME));
-        dateSort.ifPresent(s -> sort(orderList, root, cq, s, DATE));
+        nameSort.ifPresent(s -> sort(orderList, root, s, NAME));
+        dateSort.ifPresent(s -> sort(orderList, root, s, DATE));
         cq.orderBy(orderList);
         return getCurrentSession().createQuery(cq)
                 .setFirstResult(start)
                 .setMaxResults(limit)
                 .list();
 
+    }
+
+    @Override
+    public long getCount() {
+        return (long) getCurrentSession()
+                .createQuery("select count(c) from Certificate c")
+                .uniqueResult();
     }
 
     private void filter(CriteriaQuery<Certificate> cq, Root<Certificate> root, Set<Tag> tagIdSet, Optional<String> part) {
@@ -139,7 +146,7 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
 
     }
 
-    private void sort(List<Order> orderList, Root<Certificate> root, CriteriaQuery<Certificate> cq, String sortOrder, String rootField) {
+    private void sort(List<Order> orderList, Root<Certificate> root, String sortOrder, String rootField) {
         CriteriaBuilder cb = getCurrentSession().getCriteriaBuilder();
         if (sortOrder.equalsIgnoreCase(ASC)) {
             orderList.add((cb.asc(root.get(rootField))));

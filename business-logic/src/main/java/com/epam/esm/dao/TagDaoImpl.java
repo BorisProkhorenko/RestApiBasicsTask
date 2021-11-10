@@ -14,7 +14,7 @@ import java.util.List;
 @Transactional
 public class TagDaoImpl extends AbstractDao implements TagDao {
 
-    private static final String HQL_GET_TAG_BY_ORDERS =" select tag FROM User u join u.orders o" +
+    private static final String HQL_GET_TAG_BY_ORDERS = " select tag FROM User u join u.orders o" +
             " join o.certificates c join c.tags tag group by tag.id order by" +
             " sum(o.cost) desc";
 
@@ -72,8 +72,15 @@ public class TagDaoImpl extends AbstractDao implements TagDao {
     }
 
     @Override
-    public Tag getMostUsedTagOfUserWithHighestOrdersCost(){
-        return  (Tag) getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS)
+    public long getCount() {
+        return (long) getCurrentSession()
+                .createQuery("select count(t) from Tag t")
+                .uniqueResult();
+    }
+
+    @Override
+    public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
+        return (Tag) getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS)
                 .setMaxResults(1)
                 .uniqueResult();
     }

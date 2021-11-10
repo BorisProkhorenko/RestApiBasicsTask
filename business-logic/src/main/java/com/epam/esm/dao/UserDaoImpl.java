@@ -1,12 +1,8 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.exceptions.TagNotFoundException;
+
 import com.epam.esm.exceptions.UserNotFoundException;
-import com.epam.esm.model.Identifiable;
-import com.epam.esm.model.Tag;
 import com.epam.esm.model.User;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
@@ -17,7 +13,7 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class UserDaoImpl extends AbstractDao implements UserDao{
+public class UserDaoImpl extends AbstractDao implements UserDao {
 
 
     public UserDaoImpl(SessionFactory sessionFactory) {
@@ -63,6 +59,13 @@ public class UserDaoImpl extends AbstractDao implements UserDao{
             getCurrentSession().save(user);
         }
         return user;
+    }
+
+    @Override
+    public long getCount() {
+        return (long) getCurrentSession()
+                .createQuery("select count(u) from User u")
+                .uniqueResult();
     }
 
     @Override

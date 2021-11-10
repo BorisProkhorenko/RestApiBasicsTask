@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class CertificateService extends AbstractService<Certificate>{
+public class CertificateService extends AbstractService<Certificate> {
 
     private final CertificateDao dao;
     private final static int DEFAULT_LIMIT = 5;
@@ -25,14 +25,14 @@ public class CertificateService extends AbstractService<Certificate>{
 
     public List<Certificate> getAll(Set<Long> tagIdSet, Optional<String> part,
                                     Optional<String> nameSort, Optional<String> dateSort,
-                                    Optional<Integer> limit, Optional<Integer> offset) {
+                                    Optional<Integer> page, Optional<Integer> size) {
 
-        int start = getStart(offset);
-        int lim = getLimit(limit);
+        int limit = getLimit(page);
+        int start = getStart(size, limit);
         Set<Tag> tags = tagIdSet.stream()
                 .map(Tag::new)
                 .collect(Collectors.toSet());
-        return dao.getAll(tags, part, nameSort, dateSort, start, lim);
+        return dao.getAll(tags, part, nameSort, dateSort, start, limit);
     }
 
 

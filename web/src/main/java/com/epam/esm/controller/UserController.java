@@ -3,7 +3,6 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.*;
 import com.epam.esm.exceptions.InvalidRequestException;
-import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
@@ -23,8 +22,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 /**
  * This Controller provides public API for operations with {@link User} and {@link Order} entity.
  * Uses {@link UserService} to access Data Base through business-logic layer.
- * * Uses {@link ObjectMapper} to map objects from JSON
- *  * Uses {@link UserDtoMapper} and {@link OrderDtoMapper} to map objects from Entity to Dto
+ * Uses {@link ObjectMapper} to map objects from JSON
+ * Uses {@link UserDtoMapper} and {@link OrderDtoMapper} to map objects from Entity to Dto
+ * Uses {@link PaginatedController} for pagination
  *
  * @author Boris Prokhorenko
  * @see User
@@ -34,10 +34,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
  * @see OrderDto
  * @see OrderDtoMapper
  * @see UserService
+ * @see PaginatedController
  */
 @RestController
 @RequestMapping(value = "/users")
-public class UserController {
+public class UserController extends PaginatedController<UserController, UserDto,User>{
 
     private final UserService service;
     private final ObjectMapper objectMapper;
@@ -48,6 +49,7 @@ public class UserController {
 
     public UserController(UserService service, ObjectMapper objectMapper, UserDtoMapper userDtoMapper,
                           OrderDtoMapper orderDtoMapper) {
+        super(service);
         this.service = service;
         this.objectMapper = objectMapper;
         this.userDtoMapper = userDtoMapper;
@@ -76,16 +78,16 @@ public class UserController {
     /**
      * Method allows getting all {@link User} entity objects from DB
      *
-     * @param limit - count of displayed dto objects
-     * @param offset - count of skipped dto objects
-     *
+     * @param page - page of displayed dto objects
+     * @param size - count of displayed dto objects
      * @return {@link CollectionModel} of {@link UserDto} of entity objects from DB without orders.
      */
+    @Override
     @GetMapping(produces = {"application/hal+json"})
-    public CollectionModel<UserDto> getAllUsers(@RequestParam(name = "limit") Optional<Integer> limit,
-                                                @RequestParam(name = "offset") Optional<Integer> offset) {
+    public CollectionModel<UserDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
+                                           @RequestParam(name = "size") Optional<Integer> size) {
 
-        List<UserDto> users = service.getAll(limit, offset)
+        List<UserDto> users = service.getAll(page, size)
                 .stream()
                 .peek(user -> user.setOrders(new HashSet<>()))
                 .map(userDtoMapper::toDto)
@@ -96,9 +98,10 @@ public class UserController {
             Link selfLink = linkTo(UserController.class).slash(id).withSelfRel();
             user.add(selfLink);
         }
-        Link link = linkTo(UserController.class).withSelfRel();
-
-        return CollectionModel.of(users, link);
+        List<Link> links = buildPagination(page, size, UserController.class);
+        Link selfLink = linkTo(UserController.class).withSelfRel();
+        links.add(selfLink);
+        return CollectionModel.of(users, links);
     }
 
     /**
@@ -126,7 +129,7 @@ public class UserController {
         try {
             Order order = objectMapper.readValue(json, Order.class);
             if (order.getUser() == null || order.getCertificates() == null) {
-                throw new InvalidRequestException("Empty field");
+                throw new InvalidRequestException("Empty user or certificates");
             }
             OrderDto orderDto = orderDtoMapper.toDto(service.createOrder(order));
             buildOrderLinks(orderDto);
@@ -146,6 +149,17 @@ public class UserController {
         service.deleteOrder(new Order(id));
     }
 
+
+    @Override
+    public CollectionModel<UserDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
+                                           @RequestParam(name = "size") Optional<Integer> size,
+                                           @RequestParam(name = "filter_by_tags") Optional<String> tags,
+                                           @RequestParam(name = "filter_by_part") Optional<String> part,
+                                           @RequestParam(name = "sort_by_name") Optional<String> name,
+                                           @RequestParam(name = "sort_by_date") Optional<String> date) {
+        return getAll(page,size);
+    }
+
     private void buildOrderLinks(OrderDto order) {
         Long userId = order.getUser().getId();
         Long orderId = order.getId();
@@ -157,5 +171,7 @@ public class UserController {
         Link selfLink = linkTo(UserController.class).slash(userId).slash(orderId).withSelfRel();
         order.add(selfLink);
     }
+
+
 
 }
