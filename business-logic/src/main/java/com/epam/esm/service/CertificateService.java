@@ -27,8 +27,8 @@ public class CertificateService extends AbstractService<Certificate> {
                                     Optional<String> nameSort, Optional<String> dateSort,
                                     Optional<Integer> page, Optional<Integer> size) {
 
-        int limit = getLimit(page);
-        int start = getStart(size, limit);
+        int limit = getLimit(size);
+        int start = getStart(page, limit);
         Set<Tag> tags = tagIdSet.stream()
                 .map(Tag::new)
                 .collect(Collectors.toSet());

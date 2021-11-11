@@ -16,10 +16,12 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
+    private static final String RESOURCE_NAME = "i18n";
+
     @Bean
     public MessageSource messageSource() {
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
-        source.setBasename("i18n");
+        source.setBasename(RESOURCE_NAME);
         source.setUseCodeAsDefaultMessage(true);
         return source;
     }

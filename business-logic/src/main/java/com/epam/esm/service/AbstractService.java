@@ -32,13 +32,17 @@ public abstract class AbstractService<T extends Identifiable> {
         if (start < 0) {
             start = getDefaultOffset();
         }
+        int lastPage = getPagesCount(Optional.of(limit));
+        if (start > lastPage) {
+            start = lastPage - 1;
+        }
         return start * limit;
     }
 
     protected int getLimit(Optional<Integer> size) {
         int limit = size.orElse(getDefaultLimit());
         if (limit <= 0) {
-            limit = getDefaultOffset();
+            limit = getDefaultLimit();
         }
         return limit;
     }

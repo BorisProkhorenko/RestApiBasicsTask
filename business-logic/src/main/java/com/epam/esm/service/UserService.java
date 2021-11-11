@@ -4,12 +4,9 @@ import com.epam.esm.dao.OrderDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.exceptions.OrderNotFoundException;
 import com.epam.esm.model.Order;
-import com.epam.esm.model.Tag;
 import com.epam.esm.model.User;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService extends AbstractService<User>{

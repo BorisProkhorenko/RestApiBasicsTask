@@ -45,6 +45,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
 
     private final static String TAGS = "tags";
     private final static String MOST_USED_TAG = "most_used_tag_of_user_with_highest_orders_cost";
+    private final static String MOST_USED_TAG_URL = "highest-order";
 
     public TagController(TagService service, ObjectMapper objectMapper, TagDtoMapper dtoMapper) {
         super(service);
@@ -84,7 +85,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
                 .collect(Collectors.toList());
         buildTagCollectionLinks(tags);
         List<Link> links = buildPagination(page, size, TagController.class);
-        Link mostUsedTag = linkTo(TagController.class).slash("highest-order").withRel(MOST_USED_TAG);
+        Link mostUsedTag = linkTo(TagController.class).slash(MOST_USED_TAG_URL).withRel(MOST_USED_TAG);
         links.add(mostUsedTag);
         Link selfLink = linkTo(TagController.class).withSelfRel();
         links.add(selfLink);
@@ -145,7 +146,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
     }
 
     private void buildTagLinks(TagDto tag) {
-        Link mostUsedTag = linkTo(TagController.class).slash("highest-order").withRel(MOST_USED_TAG);
+        Link mostUsedTag = linkTo(TagController.class).slash(MOST_USED_TAG_URL).withRel(MOST_USED_TAG);
         tag.add(mostUsedTag);
         Link allTags = linkTo(TagController.class).withRel(TAGS);
         tag.add(allTags);
