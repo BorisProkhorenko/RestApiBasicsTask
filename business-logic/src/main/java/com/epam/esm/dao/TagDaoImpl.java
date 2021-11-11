@@ -1,5 +1,6 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.exceptions.OrderNotFoundException;
 import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Tag;
 import org.hibernate.SessionFactory;
@@ -80,9 +81,13 @@ public class TagDaoImpl extends AbstractDao implements TagDao {
 
     @Override
     public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
-        return (Tag) getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS)
+        Tag tag = (Tag) getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS)
                 .setMaxResults(1)
                 .uniqueResult();
+        if (tag == null){
+            throw new TagNotFoundException("No orders were found");
+        }
+        return tag;
     }
 
 }
