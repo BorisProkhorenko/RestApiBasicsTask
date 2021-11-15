@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
-import java.util.Set;
+import java.util.List;
+
 
 @Relation(collectionRelation = "certificates", itemRelation = "certificate")
 public class CertificateDto extends RepresentationModel<CertificateDto> implements Dto {
@@ -32,13 +33,13 @@ public class CertificateDto extends RepresentationModel<CertificateDto> implemen
     private String lastUpdateDate;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<TagDto> tags;
+    private List<TagDto> tags;
 
     public CertificateDto() {
     }
 
     public CertificateDto(long id, String name, String description, Double price, Integer duration,
-                          String createDate, String lastUpdateDate, Set<TagDto> tags) {
+                          String createDate, String lastUpdateDate, List<TagDto> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -105,11 +106,11 @@ public class CertificateDto extends RepresentationModel<CertificateDto> implemen
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public Set<TagDto> getTags() {
+    public List<TagDto> getTags() {
         return tags;
     }
 
-    public void setTags(Set<TagDto> tags) {
+    public void setTags(List<TagDto> tags) {
         this.tags = tags;
     }
 

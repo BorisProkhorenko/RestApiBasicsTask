@@ -16,7 +16,7 @@ import java.util.List;
 public class TagDaoImpl extends AbstractDao implements TagDao {
 
     private static final String HQL_GET_TAG_BY_ORDERS = " select tag FROM User u join u.orders o" +
-            " join o.certificates c join c.tags tag group by tag.id order by" +
+            " join o.snapshots s join s.certificate c join c.tags tag group by tag.id order by" +
             " sum(o.cost) desc";
 
     public TagDaoImpl(SessionFactory sessionFactory) {

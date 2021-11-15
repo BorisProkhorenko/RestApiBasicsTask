@@ -32,10 +32,7 @@ public class Order implements Identifiable{
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderCertificate> snapshots;
 
-    @NotAudited
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "order_gift_certificate", joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "gift_certificate_id"))
+    @Transient
     private List<Certificate> certificates;
 
 

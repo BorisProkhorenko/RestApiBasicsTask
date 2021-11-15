@@ -1,8 +1,10 @@
 package com.epam.esm.dto;
 
 import com.epam.esm.model.Certificate;
+import com.epam.esm.model.Tag;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,10 +21,11 @@ public class CertificateDtoMapper extends DateMapper{
     public CertificateDto toDto(Certificate certificate) {
         String createDate = toISOFormatDate(certificate.getCreateDate());
         String updateDate = toISOFormatDate(certificate.getLastUpdateDate());
-        Set<TagDto> tagDtoSet = certificate.getTags()
+        Set<Tag> tags = certificate.getTags();
+        List<TagDto> tagDtoSet = tags
                 .stream()
                 .map(tagDtoMapper::toDto)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         return new CertificateDto(certificate.getId(), certificate.getName(), certificate.getDescription(),
                 certificate.getPrice(), certificate.getDuration(), createDate, updateDate, tagDtoSet);
     }

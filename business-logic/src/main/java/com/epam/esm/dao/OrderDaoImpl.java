@@ -104,10 +104,12 @@ public class OrderDaoImpl extends AbstractDao implements OrderDao {
             OrderCertificate orderCertificate = new OrderCertificate(order, certificate, snapshot);
             orderCertificates.add(orderCertificate);
         }
+        System.out.println(orderCertificates);
         order.setSnapshots(orderCertificates);
     }
 
-    private void mapSnapshots(Order order) {
+    @Override
+    public void mapSnapshots(Order order) {
         List<Certificate> certificates = new ArrayList<>();
         for (OrderCertificate orderCertificate : order.getSnapshots()) {
             String snapshot = orderCertificate.getSnapshot();

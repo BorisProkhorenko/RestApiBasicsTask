@@ -2,6 +2,7 @@ package com.epam.esm.dao;
 
 
 import com.epam.esm.exceptions.UserNotFoundException;
+import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -10,20 +11,24 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 @Transactional
 public class UserDaoImpl extends AbstractDao implements UserDao {
 
+    private final OrderDao orderDao;
 
-    public UserDaoImpl(SessionFactory sessionFactory) {
+    public UserDaoImpl(SessionFactory sessionFactory, OrderDao orderDao) {
         super(sessionFactory);
+        this.orderDao = orderDao;
     }
 
     @Override
     public User getById(Long id) {
         User user = getCurrentSession().get(User.class, id);
         if (user != null) {
+            mapCertificates(user.getOrders());
             return user;
         } else {
             throw new UserNotFoundException(id);
@@ -37,6 +42,7 @@ public class UserDaoImpl extends AbstractDao implements UserDao {
                 .setParameter("username", username);
         User user = (User) query.uniqueResult();
         if (user != null) {
+            mapCertificates(user.getOrders());
             return user;
         } else {
             throw new UserNotFoundException(username);
@@ -45,10 +51,14 @@ public class UserDaoImpl extends AbstractDao implements UserDao {
 
     @Override
     public List<User> getAll(int start, int limit) {
-        return getCurrentSession().createQuery("from User")
+        List<User> users = getCurrentSession().createQuery("from User")
                 .setFirstResult(start)
                 .setMaxResults(limit)
                 .list();
+        users.stream()
+                .map(User::getOrders)
+                .forEach(this::mapCertificates);
+        return users;
     }
 
     @Override
@@ -71,6 +81,11 @@ public class UserDaoImpl extends AbstractDao implements UserDao {
     @Override
     public void delete(User user) {
         getCurrentSession().delete(user);
+    }
+
+
+    private void mapCertificates(Set<Order> orderSet){
+        orderSet.forEach(orderDao::mapSnapshots);
     }
 
 }

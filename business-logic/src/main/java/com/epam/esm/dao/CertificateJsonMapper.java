@@ -30,7 +30,7 @@ public class CertificateJsonMapper {
         try {
             return objectMapper.readValue(stringOrder, Certificate.class);
         } catch (Exception e) {
-            throw new InvalidRequestException("Empty or invalid snapshot of certificate:" + e.getMessage());
+            throw new InvalidRequestException( "Empty or invalid Certificate JSON Snapshot " + e.getMessage());
         }
     }
 
