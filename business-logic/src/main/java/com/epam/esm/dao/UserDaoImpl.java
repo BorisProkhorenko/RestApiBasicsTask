@@ -41,12 +41,12 @@ public class UserDaoImpl extends AbstractDao implements UserDao {
         Query query = getCurrentSession().createQuery("from User where username =:username")
                 .setParameter("username", username);
         User user = (User) query.uniqueResult();
-        if (user != null) {
-            mapCertificates(user.getOrders());
-            return user;
-        } else {
+        if (user == null) {
             throw new UserNotFoundException(username);
+
         }
+        mapCertificates(user.getOrders());
+        return user;
     }
 
     @Override

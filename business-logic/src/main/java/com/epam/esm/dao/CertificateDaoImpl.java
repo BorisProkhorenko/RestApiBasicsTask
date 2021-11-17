@@ -2,7 +2,6 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exceptions.CertificateNotFoundException;
 import com.epam.esm.exceptions.InvalidRequestException;
-import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import org.hibernate.SessionFactory;
@@ -35,11 +34,11 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
     @Override
     public Certificate getById(Long id) {
         Certificate certificate = getCurrentSession().get(Certificate.class, id);
-        if (certificate != null) {
-            return certificate;
-        } else {
+        if (certificate == null) {
             throw new CertificateNotFoundException(id);
+
         }
+        return certificate;
     }
 
     @Override
@@ -64,22 +63,42 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
     }
 
     private Certificate mapFields(Certificate newCert, Certificate certificateFromDb) {
+        mapName(newCert,certificateFromDb);
+        mapDescription(newCert,certificateFromDb);
+        mapPrice(newCert,certificateFromDb);
+        mapDuration(newCert,certificateFromDb);
+        mapTags(newCert,certificateFromDb);
+        return certificateFromDb;
+    }
+
+    private void mapName(Certificate newCert, Certificate certificateFromDb){
         if (newCert.getName() != null) {
             certificateFromDb.setName(newCert.getName());
         }
+    }
+
+    private void mapDescription(Certificate newCert, Certificate certificateFromDb){
         if (newCert.getDescription() != null) {
             certificateFromDb.setDescription(newCert.getDescription());
         }
+    }
+
+    private void mapPrice(Certificate newCert, Certificate certificateFromDb){
         if (newCert.getPrice() != null) {
             certificateFromDb.setPrice(newCert.getPrice());
         }
+    }
+
+    private void mapDuration(Certificate newCert, Certificate certificateFromDb){
         if (newCert.getDuration() != null) {
             certificateFromDb.setDuration(newCert.getDuration());
         }
+    }
+
+    private void mapTags(Certificate newCert, Certificate certificateFromDb){
         if (newCert.getTags() != null) {
             certificateFromDb.setTags(newCert.getTags());
         }
-        return certificateFromDb;
     }
 
 
@@ -90,7 +109,6 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
                 try {
                     Tag tag = tagDao.getTagByName(t.getName());
                     t.setId(tag.getId());
-                } catch (TagNotFoundException ignored) {
                 } finally {
                     getCurrentSession().clear();
                 }

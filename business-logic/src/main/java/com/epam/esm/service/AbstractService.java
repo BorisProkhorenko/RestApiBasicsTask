@@ -33,7 +33,7 @@ public abstract class AbstractService<T extends Identifiable> {
             start = getDefaultOffset();
         }
         int lastPage = getPagesCount(Optional.of(limit));
-        if (start > lastPage) {
+        if (start >= lastPage) {
             start = lastPage - 1;
         }
         return start * limit;

@@ -30,12 +30,12 @@ public class OrderDaoImpl extends AbstractDao implements OrderDao {
     @Override
     public Order getById(Long id) {
         Order order = getCurrentSession().get(Order.class, id);
-        if (order != null) {
-            mapSnapshots(order);
-            return order;
-        } else {
+        if (order == null) {
             throw new OrderNotFoundException(id);
+
         }
+        mapSnapshots(order);
+        return order;
     }
 
     @Override

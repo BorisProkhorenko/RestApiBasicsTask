@@ -26,11 +26,11 @@ public class TagDaoImpl extends AbstractDao implements TagDao {
     @Override
     public Tag getById(Long id) {
         Tag tag = getCurrentSession().get(Tag.class, id);
-        if (tag != null) {
-            return tag;
-        } else {
+        if (tag == null) {
             throw new TagNotFoundException(id);
+
         }
+        return tag;
 
     }
 
@@ -84,7 +84,7 @@ public class TagDaoImpl extends AbstractDao implements TagDao {
         Tag tag = (Tag) getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS)
                 .setMaxResults(1)
                 .uniqueResult();
-        if (tag == null){
+        if (tag == null) {
             throw new TagNotFoundException("No orders were found");
         }
         return tag;
