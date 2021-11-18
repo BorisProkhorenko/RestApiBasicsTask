@@ -2,10 +2,10 @@ package com.epam.esm.repo;
 
 
 import com.epam.esm.config.RepoApplication;
-import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.exceptions.CertificateNotFoundException;
 
-import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,19 +33,19 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
         locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @Transactional
-public class GiftCertificateDaoTest {
+public class CertificateDaoTest {
 
     @Autowired
-    private GiftCertificateDao dao;
+    private CertificateDao dao;
 
 
     @Test
     public void testCreateAndGetByIdOk() {
         //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
+        Certificate certificate = new Certificate("name", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
-        GiftCertificate certificateFromDb = dao.getCertificateById(1L);
+        dao.create(certificate);
+        Certificate certificateFromDb = dao.getById(1L);
         //then
         Assertions.assertEquals("name", certificateFromDb.getName());
     }
@@ -53,10 +53,10 @@ public class GiftCertificateDaoTest {
     @Test
     public void testCreateAndGetAllOk() {
         //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
+        Certificate certificate = new Certificate("name", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
-        List<GiftCertificate> certificates = dao.getAllCertificates();
+        dao.create(certificate);
+        List<Certificate> certificates = dao.getAll(0,5);
         //then
         Assertions.assertEquals(1, certificates.size());
     }
@@ -64,25 +64,25 @@ public class GiftCertificateDaoTest {
     @Test()
     public void testCreateAndDeleteByIdThrowsException() {
         //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
+        Certificate certificate = new Certificate("name", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
+        dao.create(certificate);
         certificate.setId(1L);
-        dao.deleteCertificate(certificate);
+        dao.delete(certificate);
         //then
         Assertions.assertThrows(CertificateNotFoundException.class, () ->
-                dao.getCertificateById(1L));
+                dao.getById(1L));
     }
 
     @Test
     public void testCreateThenUpdateAndGetByIdOk() {
         //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        GiftCertificate updated = new GiftCertificate(1L, "updated", null, 3, 5);
+        Certificate certificate = new Certificate("name", "description", 3, 5);
+        Certificate updated = new Certificate(1L, "updated", null, 3, 5);
         //when
-        dao.createCertificate(certificate);
-        dao.updateCertificate(updated);
-        GiftCertificate certificateFromDb = dao.getCertificateById(1L);
+        dao.create(certificate);
+        dao.update(updated);
+        Certificate certificateFromDb = dao.getById(1L);
         //then
         Assertions.assertEquals("updated", certificateFromDb.getName());
         Assertions.assertEquals("description", certificateFromDb.getDescription());
@@ -91,25 +91,25 @@ public class GiftCertificateDaoTest {
     @Test
     public void testCreateAndUpdateException() {
         //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        GiftCertificate updated = new GiftCertificate("updated", "description", 3, 5);
+        Certificate certificate = new Certificate("name", "description", 3, 5);
+        Certificate updated = new Certificate("updated", "description", 3, 5);
         //when
-        dao.createCertificate(certificate);
+        dao.create(certificate);
         //then
         Assertions.assertThrows(CertificateNotFoundException.class, () ->
-                dao.updateCertificate(updated));
+                dao.update(updated));
     }
 
     @Test
     public void testCreateWithTagsGetByIdOk() {
         //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
+        Certificate certificate = new Certificate("name", "description", 3, 5);
         Set<com.epam.esm.model.Tag> tags = new HashSet<>();
         tags.add(new Tag("tag"));
         certificate.setTags(tags);
         //when
-        dao.createCertificate(certificate);
-        GiftCertificate certificateFromDB = dao.getCertificateById(1L);
+        dao.create(certificate);
+        Certificate certificateFromDB = dao.getById(1L);
         //then
         Assertions.assertEquals(1, certificateFromDB.getTags().size());
     }
@@ -117,8 +117,8 @@ public class GiftCertificateDaoTest {
     @Test
     public void testCreateAndUpdateWithTagsGetByIdOk() {
         //given
-        GiftCertificate certificate = new GiftCertificate("name", "description", 3, 5);
-        GiftCertificate updated = new GiftCertificate(1L,"updated", "updated", 3, 5);
+        Certificate certificate = new Certificate("name", "description", 3, 5);
+        Certificate updated = new Certificate(1L,"updated", "updated", 3, 5);
         Set<com.epam.esm.model.Tag> tags = new HashSet<>();
         Set<com.epam.esm.model.Tag> tagsUpdated = new HashSet<>();
         tags.add(new Tag("tag"));
@@ -127,10 +127,10 @@ public class GiftCertificateDaoTest {
         certificate.setTags(tags);
         updated.setTags(tagsUpdated);
         //when
-        dao.createCertificate(certificate);
-        System.out.println(dao.getAllCertificates());
-        dao.updateCertificate(updated);
-        GiftCertificate certificateFromDB = dao.getCertificateById(1L);
+        dao.create(certificate);
+        System.out.println(dao.getAll(0,5));
+        dao.update(updated);
+        Certificate certificateFromDB = dao.getById(1L);
         //then
         Assertions.assertEquals(2, certificateFromDB.getTags().size());
     }

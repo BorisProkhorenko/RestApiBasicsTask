@@ -4,37 +4,31 @@ import com.epam.esm.dao.TagDao;
 import com.epam.esm.model.Tag;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
-public class TagService {
+public class TagService extends AbstractService<Tag>{
 
 
     private final TagDao dao;
+    private final static int DEFAULT_LIMIT = 20;
+    private final static int DEFAULT_OFFSET = 0;
 
     public TagService(TagDao dao) {
+        super(dao);
         this.dao = dao;
     }
 
-
-    public Tag getTagById(Long id) {
-        return dao.getTagById(id);
+    public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
+        return dao.getMostUsedTagOfUserWithHighestOrdersCost();
     }
 
-    public List<Tag> getAllTags() {
-
-        return dao.getAllTags();
+    @Override
+    public int getDefaultOffset() {
+        return DEFAULT_OFFSET;
     }
 
-    public void deleteTag(Long id) {
-        Tag tag = new Tag();
-        tag.setId(id);
-        dao.deleteTag(tag);
+    @Override
+    public int getDefaultLimit() {
+        return DEFAULT_LIMIT;
     }
-
-    public Tag createTag(Tag tag) {
-        return dao.createTag(tag);
-    }
-
-
 }

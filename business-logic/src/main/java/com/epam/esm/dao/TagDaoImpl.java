@@ -1,9 +1,8 @@
 package com.epam.esm.dao;
 
+
 import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Tag;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
@@ -14,27 +13,29 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class TagDaoImpl implements TagDao {
+public class TagDaoImpl extends AbstractDao implements TagDao {
 
-
-    private final SessionFactory sessionFactory;
+    private static final String HQL_GET_TAG_BY_ORDERS = " select tag FROM User u join u.orders o" +
+            " join o.snapshots s join s.certificate c join c.tags tag group by tag.id order by" +
+            " sum(o.cost) desc";
 
     public TagDaoImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+        super(sessionFactory);
     }
 
     @Override
-    public Tag getTagById(Long id) {
+    public Tag getById(Long id) {
         Tag tag = getCurrentSession().get(Tag.class, id);
-        if (tag != null) {
-            return tag;
-        } else {
+        if (tag == null) {
             throw new TagNotFoundException(id);
+
         }
+        return tag;
 
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Tag getTagByName(String name) {
         Query query = getCurrentSession().createQuery("from Tag where name =:name")
                 .setParameter("name", name);
@@ -48,31 +49,45 @@ public class TagDaoImpl implements TagDao {
 
 
     @Override
-    public List<Tag> getAllTags() {
-
-        return getCurrentSession().createQuery("from Tag").list();
+    public List<Tag> getAll(int start, int limit) {
+        return getCurrentSession().createQuery("from Tag")
+                .setFirstResult(start)
+                .setMaxResults(limit)
+                .list();
     }
 
     @Override
-    public void deleteTag(Tag tag) {
+    public void delete(Tag tag) {
         getCurrentSession().delete(tag);
     }
 
     @Override
-    public Tag createTag(Tag tag) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Tag create(Tag tag) {
         try {
             getTagByName(tag.getName());
         } catch (TagNotFoundException ex) {
-            getCurrentSession().saveOrUpdate(tag);
+            getCurrentSession().save(tag);
         }
         return tag;
     }
 
-    public Session getCurrentSession() {
-        try {
-            return sessionFactory.getCurrentSession();
-        } catch (HibernateException e) {
-            return sessionFactory.openSession();
-        }
+    @Override
+    public long getCount() {
+        return (long) getCurrentSession()
+                .createQuery("select count(t) from Tag t")
+                .uniqueResult();
     }
+
+    @Override
+    public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
+        Tag tag = (Tag) getCurrentSession().createQuery(HQL_GET_TAG_BY_ORDERS)
+                .setMaxResults(1)
+                .uniqueResult();
+        if (tag == null) {
+            throw new TagNotFoundException("No orders were found");
+        }
+        return tag;
+    }
+
 }

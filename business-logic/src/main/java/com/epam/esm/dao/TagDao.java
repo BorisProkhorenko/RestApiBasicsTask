@@ -1,18 +1,15 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.model.Tag;
+import com.epam.esm.model.User;
 
 import java.util.List;
 
-public interface TagDao {
+public interface TagDao extends Dao<Tag> {
 
-    Tag getTagById(Long id);
+
 
     Tag getTagByName(String name);
 
-    List<Tag> getAllTags();
-
-    void deleteTag(Tag tag);
-
-    Tag createTag(Tag tag);
+    Tag getMostUsedTagOfUserWithHighestOrdersCost();
 }

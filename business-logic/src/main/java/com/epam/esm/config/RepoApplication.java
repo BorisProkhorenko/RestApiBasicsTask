@@ -1,12 +1,9 @@
 package com.epam.esm.config;
 
-import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.model.GiftCertificate;
-import com.epam.esm.model.Tag;
+
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+
 import org.springframework.boot.SpringApplication;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,10 +19,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 
 @SpringBootApplication(exclude = { //
@@ -34,47 +28,36 @@ import java.util.Set;
         HibernateJpaAutoConfiguration.class})
 @ComponentScan("com.epam.esm")
 @EnableTransactionManagement
-public class RepoApplication {
+public class RepoApplication{
 
     @Autowired
     private Environment env;
-
-/*
-    @Autowired
-    private GiftCertificateDao dao;
-
- */
-
 
 
     public static void main(String[] args) {
         SpringApplication.run(RepoApplication.class, args);
     }
 
-/*
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        GiftCertificate certificate = new GiftCertificate(56,"Changed", null,5,7);
-        Set<Tag> tagSet = new HashSet<>();
-        Tag tag = new Tag("neo Tagkj;lk;lddbc3g");
-        tagSet.add(tag);
-        certificate.setTags(tagSet);
-        dao.updateCertificate(certificate);
-        System.out.println(dao.getAllCertificates());
-    }
-
-
- */
+    private static final String DRIVER_CLASS_NAME = "spring.datasource.driver-class-name";
+    private static final String URL = "spring.datasource.url";
+    private static final String USERNAME = "spring.datasource.username";
+    private static final String PASSWORD = "spring.datasource.password";
+    private static final String ENTITY_PACK = "com.epam.esm.model";
+    private static final String DIALECT = "hibernate.dialect";
+    private static final String DIALECT_PROPERTY = "spring.jpa.properties.hibernate.dialect";
+    private static final String SHOW = "hibernate.show_sql";
+    private static final String SHOW_PROPERTY = "spring.jpa.show-sql";
+    private static final String CURRENT_SESSION_CONTEXT_CLASS = "current_session_context_class";
+    private static final String CURRENT_SESSION_CONTEXT_CLASS_PROPERTY =
+            "spring.jpa.properties.hibernate.current_session_context_class";
 
     @Bean(name = "dataSource")
     public DataSource getDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
-        // See: application.properties
-        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.driver-class-name")));
-        dataSource.setUrl(env.getProperty("spring.datasource.url"));
-        dataSource.setUsername(env.getProperty("spring.datasource.username"));
-        dataSource.setPassword(env.getProperty("spring.datasource.password"));
+        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty(DRIVER_CLASS_NAME)));
+        dataSource.setUrl(env.getProperty(URL));
+        dataSource.setUsername(env.getProperty(USERNAME));
+        dataSource.setPassword(env.getProperty(PASSWORD));
         return dataSource;
     }
 
@@ -83,13 +66,12 @@ public class RepoApplication {
     @Bean(name = "sessionFactory")
     public SessionFactory getSessionFactory(DataSource dataSource) throws Exception {
         Properties properties = new Properties();
-        // See: application.properties
-        properties.put("hibernate.dialect", env.getProperty("spring.jpa.properties.hibernate.dialect"));
-        properties.put("hibernate.show_sql", env.getProperty("spring.jpa.show-sql"));
-        properties.put("current_session_context_class", //
-                env.getProperty("spring.jpa.properties.hibernate.current_session_context_class"));
+        properties.put(DIALECT, env.getProperty(DIALECT_PROPERTY));
+        properties.put(SHOW, env.getProperty(SHOW_PROPERTY));
+        properties.put(CURRENT_SESSION_CONTEXT_CLASS, //
+                env.getProperty(CURRENT_SESSION_CONTEXT_CLASS_PROPERTY));
         LocalSessionFactoryBean factoryBean = new LocalSessionFactoryBean();
-        factoryBean.setPackagesToScan("com.epam.esm.model");
+        factoryBean.setPackagesToScan(ENTITY_PACK);
         factoryBean.setDataSource(dataSource);
         factoryBean.setHibernateProperties(properties);
         factoryBean.afterPropertiesSet();
@@ -102,6 +84,5 @@ public class RepoApplication {
     public HibernateTransactionManager getTransactionManager(SessionFactory sessionFactory) {
         return new HibernateTransactionManager(sessionFactory);
     }
-
 
 }

@@ -6,17 +6,23 @@ import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = RepoApplication.class)
+@ActiveProfiles("test")
 public class TagServiceTest {
 
 
@@ -26,11 +32,11 @@ public class TagServiceTest {
     @BeforeAll
     public static void init() {
         TagDao mockDao = Mockito.mock(TagDao.class);
-        when(mockDao.getTagById(anyLong()))
+        when(mockDao.getById(anyLong()))
                 .thenReturn(new Tag(MOCK));
-        when(mockDao.createTag(any()))
+        when(mockDao.create(any()))
                 .thenReturn(new Tag(MOCK));
-        when(mockDao.getAllTags())
+        when(mockDao.getAll(0,5))
                 .thenReturn(new ArrayList<>());
         service = new TagService(mockDao);
     }
@@ -39,7 +45,7 @@ public class TagServiceTest {
     @Test
     public void testGetAll() {
         //when
-        List<Tag> tags = service.getAllTags();
+        List<Tag> tags = service.getAll(Optional.of(10),Optional.of(0));
         //then
         Assertions.assertNotNull(tags);
     }
@@ -47,7 +53,7 @@ public class TagServiceTest {
     @Test
     public void testGetById() {
         //when
-        Tag tag = service.getTagById(1L);
+        Tag tag = service.getById(1L);
         //then
         Assertions.assertEquals(tag.getName(), MOCK);
     }
@@ -57,7 +63,7 @@ public class TagServiceTest {
         //given
         Tag mockTag = new Tag(MOCK);
         //when
-        Tag tag = service.createTag(mockTag);
+        Tag tag = service.create(mockTag);
         //then
         Assertions.assertEquals(tag.getName(), MOCK);
     }
