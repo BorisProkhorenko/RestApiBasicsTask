@@ -1,13 +1,10 @@
 package com.epam.esm.service;
 
 import com.epam.esm.config.RepoApplication;
-import com.epam.esm.dao.OrderDao;
-import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.UserDao;
-import com.epam.esm.exceptions.CertificateNotFoundException;
+import com.epam.esm.repository.dao.OrderDao;
+import com.epam.esm.repository.dao.UserDao;
 import com.epam.esm.exceptions.OrderNotFoundException;
 import com.epam.esm.model.Order;
-import com.epam.esm.model.Tag;
 import com.epam.esm.model.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +17,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
 
-import static javafx.scene.input.KeyCode.H;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;

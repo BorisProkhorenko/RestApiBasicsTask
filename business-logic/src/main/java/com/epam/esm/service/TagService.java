@@ -1,6 +1,6 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dao.TagDao;
+import com.epam.esm.repository.dao.TagDao;
 import com.epam.esm.model.Tag;
 import org.springframework.stereotype.Service;
 

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -110,6 +111,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      * @return {@link TagDto} of object, which you created
      */
     @PostMapping(consumes = "application/json")
+    @Secured("ROLE_ADMIN")
     public TagDto createTag(@RequestBody String json) {
         try {
             Tag tag = objectMapper.readValue(json, Tag.class);
@@ -128,6 +130,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      * @param id - primary key to search {@link Tag} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
+    @Secured("ROLE_ADMIN")
     public void deleteTag(@PathVariable Long id) {
         service.delete(new Tag(id));
     }

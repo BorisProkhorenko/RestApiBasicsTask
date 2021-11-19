@@ -1,4 +1,4 @@
-package com.epam.esm.dao;
+package com.epam.esm.repository.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;

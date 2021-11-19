@@ -1,8 +1,9 @@
-package com.epam.esm.dao;
+package com.epam.esm.repository.dao;
 
 
 import com.epam.esm.exceptions.OrderNotFoundException;
 import com.epam.esm.model.*;
+import com.epam.esm.repository.CertificateJsonMapper;
 import org.hibernate.SessionFactory;
 
 import org.springframework.stereotype.Repository;

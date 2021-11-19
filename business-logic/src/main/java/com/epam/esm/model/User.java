@@ -19,8 +19,15 @@ public class User implements Identifiable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true)
+    @Column(nullable = false,unique = true)
     private String username;
+
+    @NotAudited
+    @Column(nullable = false)
+    private String password;
+
+    @Column
+    private String role;
 
     @NotAudited
     @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
@@ -37,6 +44,10 @@ public class User implements Identifiable{
         this.id = id;
         this.username = username;
         this.orders = orders;
+    }
+
+    public User(String role) {
+        this.role = role;
     }
 
     public long getId() {
@@ -63,6 +74,22 @@ public class User implements Identifiable{
         this.username = username;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,13 +98,19 @@ public class User implements Identifiable{
         User user = (User) o;
 
         if (id != user.id) return false;
-        return Objects.equals(username, user.username);
+        if (!Objects.equals(username, user.username)) return false;
+        if (!Objects.equals(password, user.password)) return false;
+        if (!Objects.equals(role, user.role)) return false;
+        return Objects.equals(orders, user.orders);
     }
 
     @Override
     public int hashCode() {
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (role != null ? role.hashCode() : 0);
+        result = 31 * result + (orders != null ? orders.hashCode() : 0);
         return result;
     }
 
@@ -86,7 +119,9 @@ public class User implements Identifiable{
         return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", orders='" + orders + '\'' +
+                ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
+                ", orders=" + orders +
                 '}';
     }
 }

@@ -1,7 +1,8 @@
-package com.epam.esm.dao;
+package com.epam.esm.repository.dao;
 
 import com.epam.esm.exceptions.CertificateNotFoundException;
 import com.epam.esm.exceptions.InvalidRequestException;
+import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import org.hibernate.SessionFactory;
@@ -109,6 +110,7 @@ public class CertificateDaoImpl extends AbstractDao implements CertificateDao {
                 try {
                     Tag tag = tagDao.getTagByName(t.getName());
                     t.setId(tag.getId());
+                }catch (TagNotFoundException ignored){
                 } finally {
                     getCurrentSession().clear();
                 }

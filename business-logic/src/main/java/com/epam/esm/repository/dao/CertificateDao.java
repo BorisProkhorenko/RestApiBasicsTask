@@ -1,7 +1,6 @@
-package com.epam.esm.dao;
+package com.epam.esm.repository.dao;
 
 import com.epam.esm.model.Certificate;
-import com.epam.esm.model.Order;
 import com.epam.esm.model.Tag;
 
 

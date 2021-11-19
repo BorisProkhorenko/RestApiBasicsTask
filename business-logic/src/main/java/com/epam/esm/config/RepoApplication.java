@@ -70,6 +70,7 @@ public class RepoApplication{
         properties.put(SHOW, env.getProperty(SHOW_PROPERTY));
         properties.put(CURRENT_SESSION_CONTEXT_CLASS, //
                 env.getProperty(CURRENT_SESSION_CONTEXT_CLASS_PROPERTY));
+        //properties.put("hibernate.hbm2ddl.auto","update");
         LocalSessionFactoryBean factoryBean = new LocalSessionFactoryBean();
         factoryBean.setPackagesToScan(ENTITY_PACK);
         factoryBean.setDataSource(dataSource);

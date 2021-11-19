@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.session.SessionAuthenticationException;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
+import org.springframework.security.web.csrf.MissingCsrfTokenException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -52,7 +56,7 @@ public class RestResponseEntityExceptionHandler
     }
 
 
-    @ExceptionHandler({CertificateNotFoundException.class})
+        @ExceptionHandler({CertificateNotFoundException.class})
     public ResponseEntity<ErrorInfo> handleCertificateNotFoundException(CertificateNotFoundException exception,
                                                                         Locale locale) {
         ErrorInfo info = new ErrorInfo(

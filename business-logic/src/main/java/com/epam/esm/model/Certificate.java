@@ -46,8 +46,6 @@ public class Certificate implements Identifiable{
     private Set<Tag> tags;
 
 
-
-
     public Certificate() {
     }
 

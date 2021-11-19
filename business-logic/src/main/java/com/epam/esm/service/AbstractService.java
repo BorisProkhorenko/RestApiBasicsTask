@@ -1,6 +1,6 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dao.Dao;
+import com.epam.esm.repository.dao.Dao;
 import com.epam.esm.model.Identifiable;
 
 

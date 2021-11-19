@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
@@ -38,7 +39,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
  */
 @RestController
 @RequestMapping(value = "/users")
-public class UserController extends PaginatedController<UserController, UserDto,User>{
+public class UserController extends PaginatedController<UserController, UserDto, User>{
 
     private final UserService service;
     private final ObjectMapper objectMapper;
@@ -63,6 +64,7 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @return {@link UserDto} of entity object from DB
      */
     @GetMapping(value = "/{id}")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public UserDto getUserById(@PathVariable Long id) {
         UserDto user = userDtoMapper.toDto(service.getById(id));
         for (OrderDto order : user.getOrders()) {
@@ -84,6 +86,7 @@ public class UserController extends PaginatedController<UserController, UserDto,
      */
     @Override
     @GetMapping(produces = {"application/hal+json"})
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public CollectionModel<UserDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
                                            @RequestParam(name = "size") Optional<Integer> size) {
 
@@ -112,6 +115,7 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @return {@link OrderDto} of entity object from DB
      */
     @GetMapping(value = "/{userId}/{orderId}")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public OrderDto getOrderByUserAndId(@PathVariable Long userId, @PathVariable Long orderId) {
         OrderDto order = orderDtoMapper.toDto(service.getOrderByUserAndId(userId, orderId));
         buildOrderLinks(order);
@@ -125,6 +129,7 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @return {@link OrderDto} of created entity
      */
     @PostMapping(consumes = "application/json")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public OrderDto createOrderOnUser(@RequestBody String json) {
         try {
             Order order = objectMapper.readValue(json, Order.class);
@@ -145,6 +150,7 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @param id - primary key to search {@link Order} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
+    @Secured("ROLE_ADMIN")
     public void deleteOrder(@PathVariable Long id) {
         service.deleteOrder(new Order(id));
     }

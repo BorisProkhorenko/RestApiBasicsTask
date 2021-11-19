@@ -2,7 +2,7 @@ package com.epam.esm.repo;
 
 
 import com.epam.esm.config.RepoApplication;
-import com.epam.esm.dao.CertificateDao;
+import com.epam.esm.repository.dao.CertificateDao;
 import com.epam.esm.exceptions.CertificateNotFoundException;
 
 import com.epam.esm.model.Certificate;

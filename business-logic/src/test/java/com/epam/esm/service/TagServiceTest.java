@@ -1,7 +1,7 @@
 package com.epam.esm.service;
 
 import com.epam.esm.config.RepoApplication;
-import com.epam.esm.dao.TagDao;
+import com.epam.esm.repository.dao.TagDao;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
