@@ -100,8 +100,7 @@ public class User implements Identifiable{
         if (id != user.id) return false;
         if (!Objects.equals(username, user.username)) return false;
         if (!Objects.equals(password, user.password)) return false;
-        if (!Objects.equals(role, user.role)) return false;
-        return Objects.equals(orders, user.orders);
+        return Objects.equals(role, user.role);
     }
 
     @Override
@@ -110,7 +109,6 @@ public class User implements Identifiable{
         result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (role != null ? role.hashCode() : 0);
-        result = 31 * result + (orders != null ? orders.hashCode() : 0);
         return result;
     }
 
@@ -121,7 +119,6 @@ public class User implements Identifiable{
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
-                ", orders=" + orders +
                 '}';
     }
 }

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
@@ -130,18 +131,25 @@ public class UserController extends PaginatedController<UserController, UserDto,
      */
     @PostMapping(consumes = "application/json")
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
-    public OrderDto createOrderOnUser(@RequestBody String json) {
+    public OrderDto createOrderOnUser(Authentication authentication, @RequestBody String json) {
         try {
             Order order = objectMapper.readValue(json, Order.class);
-            if (order.getUser() == null || order.getCertificates() == null) {
-                throw new InvalidRequestException("Empty user or certificates");
+            if (order.getCertificates() == null) {
+                throw new InvalidRequestException("Empty  certificates");
             }
+            User user = getUserByAuthentication(authentication);
+            order.setUser(user);
             OrderDto orderDto = orderDtoMapper.toDto(service.createOrder(order));
             buildOrderLinks(orderDto);
             return orderDto;
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
+    }
+
+    private User getUserByAuthentication(Authentication authentication){
+        String username = authentication.getName();
+        return service.getUserByUsername(username);
     }
 
     /**

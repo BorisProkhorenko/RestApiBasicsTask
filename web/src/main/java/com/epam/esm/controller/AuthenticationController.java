@@ -40,7 +40,7 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity register(@RequestBody User user) throws AuthenticationException {
+    public ResponseEntity login(@RequestBody User user) throws AuthenticationException {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
