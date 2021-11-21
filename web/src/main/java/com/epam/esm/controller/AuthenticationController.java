@@ -1,8 +1,6 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.dto.UserDto;
-import com.epam.esm.dto.UserDtoMapper;
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.exceptions.UserNotFoundException;
 import com.epam.esm.model.AuthToken;
@@ -27,16 +25,14 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final TokenProvider jwtTokenUtil;
     private final UserService service;
-    private final UserDtoMapper userDtoMapper;
+
     private final BCryptPasswordEncoder bcryptEncoder;
-    private final static String USER_ROLE="USER";
 
     public AuthenticationController(AuthenticationManager authenticationManager, TokenProvider jwtTokenUtil,
-                                    UserService service, UserDtoMapper userDtoMapper, BCryptPasswordEncoder bcryptEncoder) {
+                                    UserService service, BCryptPasswordEncoder bcryptEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.service = service;
-        this.userDtoMapper = userDtoMapper;
         this.bcryptEncoder = bcryptEncoder;
     }
 
@@ -60,7 +56,7 @@ public class AuthenticationController {
             service.getUserByUsername(user.getUsername());
             throw new InvalidRequestException("User " + user.getUsername() + " already exists");
         } catch (UserNotFoundException e) {
-            user.setRole(USER_ROLE);
+            user.setRole(User.Role.USER);
             user.setPassword(bcryptEncoder.encode(user.getPassword()));
             service.create(user);
         }

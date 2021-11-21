@@ -1,4 +1,5 @@
-package com.epam.esm.security;
+package com.epam.esm.handler;
+
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -12,12 +13,11 @@ import java.io.Serializable;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {
 
-
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }

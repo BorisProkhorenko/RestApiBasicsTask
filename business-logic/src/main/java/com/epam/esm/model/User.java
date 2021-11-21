@@ -1,6 +1,7 @@
 package com.epam.esm.model;
 
 
+import com.sun.istack.NotNull;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -15,6 +16,8 @@ import java.util.Set;
 @Audited
 public class User implements Identifiable{
 
+    public enum Role {USER, ADMIN}
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -26,8 +29,9 @@ public class User implements Identifiable{
     @Column(nullable = false)
     private String password;
 
-    @Column
-    private String role;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @NotAudited
     @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
@@ -46,9 +50,6 @@ public class User implements Identifiable{
         this.orders = orders;
     }
 
-    public User(String role) {
-        this.role = role;
-    }
 
     public long getId() {
         return id;
@@ -82,11 +83,11 @@ public class User implements Identifiable{
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
