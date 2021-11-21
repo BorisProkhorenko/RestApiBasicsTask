@@ -29,6 +29,7 @@ public class AuthenticationController {
     private final UserService service;
     private final UserDtoMapper userDtoMapper;
     private final BCryptPasswordEncoder bcryptEncoder;
+    private final static String USER_ROLE="USER";
 
     public AuthenticationController(AuthenticationManager authenticationManager, TokenProvider jwtTokenUtil,
                                     UserService service, UserDtoMapper userDtoMapper, BCryptPasswordEncoder bcryptEncoder) {
@@ -59,7 +60,7 @@ public class AuthenticationController {
             service.getUserByUsername(user.getUsername());
             throw new InvalidRequestException("User " + user.getUsername() + " already exists");
         } catch (UserNotFoundException e) {
-            user.setRole("ADMIN");
+            user.setRole(USER_ROLE);
             user.setPassword(bcryptEncoder.encode(user.getPassword()));
             service.create(user);
         }

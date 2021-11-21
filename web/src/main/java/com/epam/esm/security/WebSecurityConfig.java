@@ -19,11 +19,14 @@ import javax.annotation.Resource;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Resource(name = "userService")
     private UserDetailsService userDetailsService;
+
+    private static final String AUTH_ENDPOINT ="/auth/*";
+    private static final String TAGS_ENDPOINT ="/tags";
+    private static final String CERT_ENDPOINT ="/certificates";
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -49,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().
                 authorizeRequests()
-                .antMatchers("/auth/*", "/certificates", "/tags").permitAll()
+                .antMatchers(AUTH_ENDPOINT, CERT_ENDPOINT, TAGS_ENDPOINT).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
