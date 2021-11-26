@@ -1,4 +1,4 @@
-package com.epam.esm.repository;
+package com.epam.esm.service;
 
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.Certificate;

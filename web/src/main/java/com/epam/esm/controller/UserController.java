@@ -3,11 +3,13 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.*;
 import com.epam.esm.exceptions.InvalidRequestException;
+import com.epam.esm.exceptions.UserNotFoundException;
 import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.security.access.annotation.Secured;
@@ -40,7 +42,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
  */
 @RestController
 @RequestMapping(value = "/users")
-public class UserController extends PaginatedController<UserController, UserDto, User>{
+public class UserController extends PaginatedController<UserController, UserDto, User> {
 
     private final UserService service;
     private final ObjectMapper objectMapper;
@@ -67,7 +69,11 @@ public class UserController extends PaginatedController<UserController, UserDto,
     @GetMapping(value = "/{id}")
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public UserDto getUserById(@PathVariable Long id) {
-        UserDto user = userDtoMapper.toDto(service.getById(id));
+        Optional<User> optionalUser = service.findById(id);
+        if (!optionalUser.isPresent()) {
+            throw new UserNotFoundException(id);
+        }
+        UserDto user = userDtoMapper.toDto(optionalUser.get());
         for (OrderDto order : user.getOrders()) {
             buildOrderLinks(order);
         }
@@ -81,28 +87,20 @@ public class UserController extends PaginatedController<UserController, UserDto,
     /**
      * Method allows getting all {@link User} entity objects from DB
      *
-     * @param page - page of displayed dto objects
-     * @param size - count of displayed dto objects
+     * @param pageNum - page of displayed dto objects
+     * @param size    - count of displayed dto objects
      * @return {@link CollectionModel} of {@link UserDto} of entity objects from DB without orders.
      */
     @Override
     @GetMapping(produces = {"application/hal+json"})
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
-    public CollectionModel<UserDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                           @RequestParam(name = "size") Optional<Integer> size) {
+    public CollectionModel<UserDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int pageNum,
+                                           @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
 
-        List<UserDto> users = service.getAll(page, size)
-                .stream()
-                .peek(user -> user.setOrders(new HashSet<>()))
-                .map(userDtoMapper::toDto)
-                .collect(Collectors.toList());
-
-        for (UserDto user : users) {
-            Long id = user.getId();
-            Link selfLink = linkTo(UserController.class).slash(id).withSelfRel();
-            user.add(selfLink);
-        }
-        List<Link> links = buildPagination(page, size, UserController.class);
+        Page<User> page = service.findAll(pageNum, size);
+        List<UserDto> users = getUsersFromPage(page);
+        buildUsersLinks(users);
+        List<Link> links = buildPagination(page, UserController.class);
         Link selfLink = linkTo(UserController.class).withSelfRel();
         links.add(selfLink);
         return CollectionModel.of(users, links);
@@ -132,24 +130,17 @@ public class UserController extends PaginatedController<UserController, UserDto,
     @PostMapping(consumes = "application/json")
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public OrderDto createOrderOnUser(Authentication authentication, @RequestBody String json) {
-        try {
-            Order order = objectMapper.readValue(json, Order.class);
-            if (order.getCertificates() == null) {
-                throw new InvalidRequestException("Empty  certificates");
-            }
+            Order order = readOrderFromJson(json);
             User user = getUserByAuthentication(authentication);
             order.setUser(user);
             OrderDto orderDto = orderDtoMapper.toDto(service.createOrder(order));
             buildOrderLinks(orderDto);
             return orderDto;
-        } catch (JsonProcessingException e) {
-            throw new InvalidRequestException(e.getMessage());
         }
-    }
 
-    private User getUserByAuthentication(Authentication authentication){
+    private User getUserByAuthentication(Authentication authentication) {
         String username = authentication.getName();
-        return service.getUserByUsername(username);
+        return service.findUserByUsername(username);
     }
 
     /**
@@ -165,13 +156,12 @@ public class UserController extends PaginatedController<UserController, UserDto,
 
 
     @Override
-    public CollectionModel<UserDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                           @RequestParam(name = "size") Optional<Integer> size,
+    public CollectionModel<UserDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                           @RequestParam(name = "size", required = false, defaultValue = "20") int size,
                                            @RequestParam(name = "filter_by_tags") Optional<String> tags,
                                            @RequestParam(name = "filter_by_part") Optional<String> part,
-                                           @RequestParam(name = "sort_by_name") Optional<String> name,
-                                           @RequestParam(name = "sort_by_date") Optional<String> date) {
-        return getAll(page,size);
+                                           @RequestParam(name = "sort_by", required = false) String sort) {
+        return getAll(page, size);
     }
 
     private void buildOrderLinks(OrderDto order) {
@@ -186,6 +176,33 @@ public class UserController extends PaginatedController<UserController, UserDto,
         order.add(selfLink);
     }
 
+    private List<UserDto> getUsersFromPage(Page<User> page) {
+        return page.getContent()
+                .stream()
+                .peek(user -> user.setOrders(new HashSet<>()))
+                .map(userDtoMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private void buildUsersLinks(List<UserDto> users) {
+        for (UserDto user : users) {
+            Long id = user.getId();
+            Link selfLink = linkTo(UserController.class).slash(id).withSelfRel();
+            user.add(selfLink);
+        }
+    }
+
+    private Order readOrderFromJson(String json) {
+        try {
+            Order order = objectMapper.readValue(json, Order.class);
+            if (order.getCertificates() == null) {
+                throw new InvalidRequestException("Empty  certificates");
+            }
+            return order;
+        } catch (JsonProcessingException e) {
+            throw new InvalidRequestException(e.getMessage());
+        }
+    }
 
 
 }

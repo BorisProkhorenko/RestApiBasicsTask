@@ -53,8 +53,8 @@ public class Certificate implements Identifiable{
         this.id = id;
     }
 
-    public Certificate(String name, String description, double price,
-                       int duration) {
+    public Certificate(String name, String description, Double price,
+                       Integer duration) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -63,7 +63,7 @@ public class Certificate implements Identifiable{
     }
 
     public Certificate(long id, String name, String description,
-                       double price, int duration) {
+                       Double price, Integer duration) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -72,7 +72,7 @@ public class Certificate implements Identifiable{
     }
 
     public Certificate(long id, String name, String description,
-                       double price, int duration, Set<Tag> tags) {
+                       Double price, Integer duration, Set<Tag> tags) {
         this.id = id;
         this.name = name;
         this.description = description;

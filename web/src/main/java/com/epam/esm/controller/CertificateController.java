@@ -2,12 +2,18 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.dto.CertificateDtoMapper;
+import com.epam.esm.exceptions.CertificateNotFoundException;
 import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.model.Certificate;
+import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
+import com.epam.esm.service.CertificateSpecificationsBuilder;
+import com.epam.esm.service.SearchCriteria;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.security.access.annotation.Secured;
@@ -43,6 +49,12 @@ public class CertificateController extends PaginatedController<CertificateContro
     private final CertificateDtoMapper dtoMapper;
 
     private final static String DELIMITER = ",";
+    private final static String ASC = "asc";
+    private final static String DESC = "desc";
+    private final static String PARAM_PATTERN = "\\(.*\\)";
+    private final static String LEFT_PATTERN = ".*\\(";
+    private final static String RIGHT_PATTERN = "\\)";
+    private final static String EMPTY = "";
     private final static String CERTIFICATES = "certificates";
 
     public CertificateController(CertificateService service, ObjectMapper objectMapper,
@@ -62,7 +74,11 @@ public class CertificateController extends PaginatedController<CertificateContro
      */
     @GetMapping(value = "/{id}")
     public CertificateDto getCertificateById(@PathVariable Long id) {
-        CertificateDto certificate = dtoMapper.toDto(service.getById(id));
+        Optional<Certificate> optionalCertificate =  service.findById(id);
+        if(!optionalCertificate.isPresent()){
+            throw new CertificateNotFoundException(id);
+        }
+        CertificateDto certificate = dtoMapper.toDto(optionalCertificate.get());
         buildCertificateLinks(certificate);
         return certificate;
     }
@@ -126,42 +142,41 @@ public class CertificateController extends PaginatedController<CertificateContro
     }
 
     @Override
-    public CollectionModel<CertificateDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                                  @RequestParam(name = "size") Optional<Integer> size) {
-        return getAll(page, size, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+    public CollectionModel<CertificateDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                                  @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
+        return getAll(page, size, Optional.empty(), Optional.empty(), EMPTY);
     }
 
     /**
      * Method allows getting {@link Certificate} objects from db filtered and/or sorted
      *
-     * @param page - page of displayed dto objects
+     * @param pageNum - page of displayed dto objects
      * @param size - count of displayed dto objects
      * @param tags - filtering by tags id (id numbers must be separated by delimiter "," without any spaces)
      * @param part - filtering by part of certificate name or description
-     * @param name - sorting by name(asc/desc)
-     * @param date - sorting by date of the last update(asc/desc)
      * @return @return {@link CollectionModel} of {@link CertificateDto} DTO of entity objects from DB
      */
     @Override
     @GetMapping(produces = {"application/hal+json"})
-    public CollectionModel<CertificateDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                                  @RequestParam(name = "size") Optional<Integer> size,
+    public CollectionModel<CertificateDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0")
+                                                          int pageNum,
+                                                  @RequestParam(name = "size", required = false, defaultValue = "10")
+                                                          int size,
                                                   @RequestParam(name = "filter_by_tags") Optional<String> tags,
                                                   @RequestParam(name = "filter_by_part") Optional<String> part,
-                                                  @RequestParam(name = "sort_by_name") Optional<String> name,
-                                                  @RequestParam(name = "sort_by_date") Optional<String> date) {
+                                                  @RequestParam(name = "sort_by", required = false,
+                                                          defaultValue = "asc(id)") String sort) {
 
-        Set<Long> tagIdSet = new HashSet<>();
-        if (tags.isPresent()) {
-            tagIdSet = parseTagIdParam(tags.get());
-        }
-        List<CertificateDto> certificates = service.getAll(tagIdSet, part,
-                        name, date, page, size)
+        Specification<Certificate> specification = buildSpec(tags, part);
+        Map<String, String> sorts = mapSorts(sort);
+        Page<Certificate> page = service.findAll(specification, sorts, pageNum, size);
+        List<CertificateDto> certificates = page.getContent()
                 .stream()
                 .map(dtoMapper::toDto)
                 .collect(Collectors.toList());
+
         buildCertificateCollectionLinks(certificates);
-        List<Link> links = buildPagination(page, size, CertificateController.class, tags, part, name, date);
+        List<Link> links = buildPagination(page, CertificateController.class, tags, part, sort);
         Link selfLink = linkTo(CertificateController.class).withSelfRel();
         links.add(selfLink);
         return CollectionModel.of(certificates, links);
@@ -182,10 +197,56 @@ public class CertificateController extends PaginatedController<CertificateContro
 
     }
 
-    private Set<Long> parseTagIdParam(String tagIdParam) {
+    private Specification<Certificate> buildSpec(Optional<String> tags, Optional<String> part) {
+        CertificateSpecificationsBuilder builder = new CertificateSpecificationsBuilder();
+        buildTagsSpec(tags, builder);
+        buildPartSpec(part, builder);
+        return builder.build();
+    }
+
+    private void buildTagsSpec(Optional<String> tags, CertificateSpecificationsBuilder builder) {
+        if (tags.isPresent()) {
+            Set<Tag> tagIdSet = parseTagIdParam(tags.get());
+            builder.with(SearchCriteria.Operation.TAGS, tagIdSet);
+        }
+    }
+
+    private void buildPartSpec(Optional<String> optionalPart, CertificateSpecificationsBuilder builder) {
+        if (optionalPart.isPresent()) {
+            String part = optionalPart.get();
+            builder.with(SearchCriteria.Operation.PART, part);
+        }
+    }
+
+    private Map<String, String> mapSorts(String sort) {
+        String[] params = sort.split(DELIMITER);
+        Map<String, String> sortMap = new HashMap<>();
+        for (String param : params) {
+            mapSortParam(param, sortMap);
+        }
+        return sortMap;
+    }
+
+    private void mapSortParam(String param, Map<String, String> sortMap) {
+        if (param.matches(ASC + PARAM_PATTERN)) {
+            String key = parseKey(param);
+            sortMap.put(key, ASC);
+        } else if (param.matches(DESC + PARAM_PATTERN)) {
+            String key = parseKey(param);
+            sortMap.put(key, DESC);
+        }
+    }
+
+    private String parseKey(String param) {
+        return param.replaceAll(LEFT_PATTERN, EMPTY)
+                .replaceAll(RIGHT_PATTERN, EMPTY);
+    }
+
+    private Set<Tag> parseTagIdParam(String tagIdParam) {
         String[] params = tagIdParam.split(DELIMITER);
         return Arrays.stream(params)
                 .map(Long::parseLong)
+                .map(Tag::new)
                 .collect(Collectors.toSet());
     }
 

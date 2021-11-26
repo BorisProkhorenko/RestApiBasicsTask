@@ -1,68 +1,39 @@
 package com.epam.esm.service;
 
-import com.epam.esm.repository.dao.Dao;
 import com.epam.esm.model.Identifiable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 
-import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractService<T extends Identifiable> {
 
-    private final Dao<T> dao;
+    private final PagingAndSortingRepository<T, Long> repository;
 
-    protected AbstractService(Dao<T> dao) {
-        this.dao = dao;
+    protected AbstractService(PagingAndSortingRepository<T, Long> repository) {
+        this.repository = repository;
     }
 
-    public T getById(Long id) {
-        return dao.getById(id);
+    public Optional<T> findById(Long id) {
+        return repository.findById(id);
     }
 
-    public List<T> getAll(Optional<Integer> page, Optional<Integer> size) {
-        int limit = getLimit(size);
-        int start = getStart(page, limit);
-        return dao.getAll(start, limit);
+    public Page<T> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findAll(pageable);
     }
 
-
-    protected int getStart(Optional<Integer> page, int limit) {
-        int start = page.orElse(getDefaultOffset());
-        start--;
-        if (start < 0) {
-            start = getDefaultOffset();
-        }
-        int lastPage = getPagesCount(Optional.of(limit));
-        if (start >= lastPage) {
-            start = lastPage - 1;
-        }
-        return start * limit;
-    }
-
-    protected int getLimit(Optional<Integer> size) {
-        int limit = size.orElse(getDefaultLimit());
-        if (limit <= 0) {
-            limit = getDefaultLimit();
-        }
-        return limit;
-    }
 
     public void delete(T identifiable) {
-        dao.delete(identifiable);
+        repository.delete(identifiable);
     }
 
     public T create(T identifiable) {
-        return dao.create(identifiable);
+        return repository.save(identifiable);
     }
 
-    public int getPagesCount(Optional<Integer> optionalSize) {
-        long count = dao.getCount();
-        int size = optionalSize.orElse(getDefaultLimit());
-        return count % size == 0 ? (int) count / size : (int) count / size + 1;
-    }
-
-    public abstract int getDefaultOffset();
-
-    public abstract int getDefaultLimit();
 
 }

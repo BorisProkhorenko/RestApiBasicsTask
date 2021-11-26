@@ -53,7 +53,7 @@ public class AuthenticationController {
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public void signUp(@RequestBody User user) {
         try {
-            service.getUserByUsername(user.getUsername());
+            service.findUserByUsername(user.getUsername());
             throw new InvalidRequestException("User " + user.getUsername() + " already exists");
         } catch (UserNotFoundException e) {
             user.setRole(User.Role.USER);
