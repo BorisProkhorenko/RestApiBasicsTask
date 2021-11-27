@@ -1,14 +1,5 @@
 package com.epam.esm.config;
 
-
-import com.epam.esm.model.Certificate;
-import com.epam.esm.model.Order;
-import com.epam.esm.model.Tag;
-import com.epam.esm.model.User;
-import com.epam.esm.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,17 +14,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("com.epam.esm")
 @EnableJpaRepositories(basePackages = "com.epam.esm.repository")
 @EntityScan("com.epam.esm.model")
-public class RepoApplication implements ApplicationRunner {
+public class RepoApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(RepoApplication.class, args);
     }
 
-    @Autowired
-    private UserService service;
 
-    @Override
-    public void run(ApplicationArguments args) {
-
-    }
 }

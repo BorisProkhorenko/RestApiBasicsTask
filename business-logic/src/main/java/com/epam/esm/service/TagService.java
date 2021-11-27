@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.model.Tag;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,9 @@ public class TagService extends AbstractService<Tag> {
     public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
         Page<Tag> page = repository.getPageTagOfUserWithHighestOrdersCost(
                 PageRequest.of(0, 1));
+        if(!page.hasContent()){
+            throw new TagNotFoundException("No orders found");
+        }
         return page.getContent().get(0);
     }
 

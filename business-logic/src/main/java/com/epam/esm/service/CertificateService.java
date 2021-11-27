@@ -1,7 +1,6 @@
 package com.epam.esm.service;
 
 import com.epam.esm.exceptions.CertificateNotFoundException;
-import com.epam.esm.exceptions.InvalidRequestException;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.model.Certificate;
 
@@ -10,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.stereotype.Service;
 
 
