@@ -1,17 +1,21 @@
 package com.epam.esm.service;
 
 import com.epam.esm.exceptions.CertificateNotFoundException;
+import com.epam.esm.model.Tag;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.model.Certificate;
 
+import com.epam.esm.repository.TagRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
+import javax.persistence.EntityManager;
 import java.util.*;
 
 
@@ -19,12 +23,16 @@ import java.util.*;
 public class CertificateService extends AbstractService<Certificate> {
 
     private final CertificateRepository repository;
+    private final TagRepository tagRepository;
+    private final EntityManager em;
     private final static String ASC = "asc";
     private final static String DESC = "desc";
 
-    public CertificateService(CertificateRepository repository) {
+    public CertificateService(CertificateRepository repository, TagRepository tagRepository, EntityManager em) {
         super(repository);
         this.repository = repository;
+        this.tagRepository = tagRepository;
+        this.em = em;
     }
 
 
@@ -41,6 +49,7 @@ public class CertificateService extends AbstractService<Certificate> {
 
     }
 
+    @Transactional
     public Certificate update(Certificate certificate) {
         mapNonNullFields(certificate);
         return repository.save(certificate);
@@ -113,6 +122,37 @@ public class CertificateService extends AbstractService<Certificate> {
     private void checkTags(Certificate certificate, Certificate fromDb) {
         if (certificate.getTags() == null) {
             certificate.setTags(fromDb.getTags());
+        } else {
+            mapTags(certificate);
         }
     }
+
+    @Override
+    @Transactional
+    public Certificate create(Certificate certificate) {
+        mapTags(certificate);
+        return repository.save(certificate);
+    }
+
+    private void mapTag(Set<Tag> tags, Tag tag) {
+        Optional<Tag> fromDb = tagRepository.findByName(tag.getName());
+        if (fromDb.isPresent()) {
+            tag.setId(fromDb.get().getId());
+        }
+
+        if (!em.contains(tag)) {
+            tag = em.merge(tag);
+        }
+        tags.add(tag);
+    }
+
+    private void mapTags(Certificate certificate) {
+        Set<Tag> tags = new HashSet<>();
+        for (Tag tag : certificate.getTags()) {
+            mapTag(tags, tag);
+        }
+        certificate.setTags(tags);
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.epam.esm.config;
 
+
 import org.springframework.boot.SpringApplication;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "com.epam.esm.repository")
 @EntityScan("com.epam.esm.model")
 public class RepoApplication {
+
 
     public static void main(String[] args) {
         SpringApplication.run(RepoApplication.class, args);

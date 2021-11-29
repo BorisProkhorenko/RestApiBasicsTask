@@ -93,7 +93,7 @@ public class UserController extends PaginatedController<UserController, UserDto,
      */
     @Override
     @GetMapping(produces = {"application/hal+json"})
-    @Secured({"ROLE_ADMIN", "ROLE_USER"})
+    @Secured({"ROLE_ADMIN"})
     public CollectionModel<UserDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int pageNum,
                                            @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
 
