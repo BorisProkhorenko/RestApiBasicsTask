@@ -47,13 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService)
                 .passwordEncoder(encoder());
     }
-/*
-    @Bean
-    public JwtAuthenticationFilter authenticationTokenFilterBean() {
-        return new JwtAuthenticationFilter();
-    }
 
- */
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -64,11 +58,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        /*
-        http
-                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-
-         */
     }
 
     @Bean
