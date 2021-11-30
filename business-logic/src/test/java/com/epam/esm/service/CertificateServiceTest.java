@@ -31,10 +31,8 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @Transactional
 public class CertificateServiceTest {
 
-
     @Autowired
     private CertificateService service;
-
 
     @Test
     public void testCreateAndGetByIdOk() {

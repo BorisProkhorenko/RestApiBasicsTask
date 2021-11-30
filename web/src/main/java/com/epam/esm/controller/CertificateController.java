@@ -16,7 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -91,7 +91,7 @@ public class CertificateController extends PaginatedController<CertificateContro
      * @return {@link CertificateDto} DTO of object, which you created
      */
     @PostMapping(consumes = "application/json")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public CertificateDto createCertificate(@RequestBody String json) {
         try {
             Certificate certificate = objectMapper.readValue(json, Certificate.class);
@@ -113,7 +113,7 @@ public class CertificateController extends PaginatedController<CertificateContro
      * @param id - primary key to search {@link CertificateDto} DTO of entity object in DB
      */
     @DeleteMapping(value = "/{id}")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public void deleteCertificate(@PathVariable Long id) {
         service.delete(new Certificate(id));
     }
@@ -126,7 +126,7 @@ public class CertificateController extends PaginatedController<CertificateContro
      * @return {@link CertificateDto}  - dto of updated entity
      */
     @PutMapping(consumes = "application/json")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public CertificateDto updateCustomer(@RequestBody String json) {
         try {
             Certificate certificate = objectMapper.readValue(json, Certificate.class);

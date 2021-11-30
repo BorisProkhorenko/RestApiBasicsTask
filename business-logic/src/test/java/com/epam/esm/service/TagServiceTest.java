@@ -33,6 +33,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @Transactional
 public class TagServiceTest {
+
     @Autowired
     private TagService service;
 

@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -65,8 +65,8 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      */
     @GetMapping(value = "/{id}")
     public TagDto getTagById(@PathVariable Long id) {
-        Optional<Tag> optionalTag =  service.findById(id);
-        if(!optionalTag.isPresent()){
+        Optional<Tag> optionalTag = service.findById(id);
+        if (!optionalTag.isPresent()) {
             throw new TagNotFoundException(id);
         }
         TagDto tag = dtoMapper.toDto(optionalTag.get());
@@ -78,13 +78,13 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      * Method allows getting all {@link Tag} entity objects from DB
      *
      * @param pageNum - page of displayed dto objects
-     * @param size - count of displayed dto objects
+     * @param size    - count of displayed dto objects
      * @return {@link CollectionModel} of {@link TagDto} of entity objects from DB
      */
     @Override
     @GetMapping(produces = {"application/hal+json"})
-    public CollectionModel<TagDto> getAll(@RequestParam(name = "page",required = false, defaultValue = "0") int pageNum,
-                                          @RequestParam(name = "size",required = false, defaultValue = "20") int size) {
+    public CollectionModel<TagDto> getAll( @RequestParam(name = "page", required = false, defaultValue = "0") int pageNum,
+                                          @RequestParam(name = "size", required = false, defaultValue = "20") int size) {
 
         Page<Tag> page = service.findAll(pageNum, size);
         List<TagDto> tags = page.getContent()
@@ -102,12 +102,12 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
     }
 
     @Override
-    public CollectionModel<TagDto> getAll(@RequestParam(name = "page",required = false, defaultValue = "0") int page,
-                                          @RequestParam(name = "size",required = false, defaultValue = "20") int size,
+    public CollectionModel<TagDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                          @RequestParam(name = "size", required = false, defaultValue = "20") int size,
                                           @RequestParam(name = "filter_by_tags") Optional<String> tags,
                                           @RequestParam(name = "filter_by_part") Optional<String> part,
-                                          @RequestParam(name = "sort_by",required = false) String sort) {
-        return getAll(page, size);
+                                          @RequestParam(name = "sort_by", required = false) String sort) {
+        return getAll( page, size);
     }
 
     /**
@@ -117,7 +117,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      * @return {@link TagDto} of object, which you created
      */
     @PostMapping(consumes = "application/json")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public TagDto createTag(@RequestBody String json) {
         try {
             Tag tag = objectMapper.readValue(json, Tag.class);
@@ -136,7 +136,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      * @param id - primary key to search {@link Tag} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public void deleteTag(@PathVariable Long id) {
         service.delete(new Tag(id));
     }

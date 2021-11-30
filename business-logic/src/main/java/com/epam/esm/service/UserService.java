@@ -1,8 +1,10 @@
 package com.epam.esm.service;
 
+import com.epam.esm.exceptions.CertificateNotFoundException;
 import com.epam.esm.exceptions.UserNotFoundException;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.OrderCertificate;
+import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.UserRepository;
 import com.epam.esm.exceptions.OrderNotFoundException;
@@ -17,18 +19,21 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 
+
 @Service
 public class UserService extends AbstractService<User> implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final CertificateRepository certificateRepository;
     private final CertificateJsonMapper jsonMapper;
 
 
-    public UserService(UserRepository userRepository, OrderRepository orderRepository, CertificateJsonMapper jsonMapper) {
+    public UserService(UserRepository userRepository, OrderRepository orderRepository, CertificateRepository certificateRepository, CertificateJsonMapper jsonMapper) {
         super(userRepository);
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
+        this.certificateRepository = certificateRepository;
         this.jsonMapper = jsonMapper;
     }
 
@@ -42,12 +47,8 @@ public class UserService extends AbstractService<User> implements UserDetailsSer
     }
 
     public Order createOrder(Order order) {
-        long userId = order.getUser().getId();
-        Optional<User> user = userRepository.findById(userId);
-        if (!user.isPresent()) {
-            throw new UserNotFoundException(userId);
-        }
-        order.setUser(user.get());
+        validateUser(order);
+        validateCertWithDb(order);
         calculateCost(order);
         createSnapshots(order);
         return orderRepository.save(order);
@@ -89,10 +90,30 @@ public class UserService extends AbstractService<User> implements UserDetailsSer
         }
     }
 
+    private void validateUser(Order order) {
+        long userId = order.getUser().getId();
+        Optional<User> user = userRepository.findById(userId);
+        ifUserPresent(user, userId);
+        order.setUser(user.get());
+    }
+
     private Order validateOrder(Order order, User user) {
         if (order.getUser().equals(user)) {
             return order;
         } else throw new OrderNotFoundException(order.getId());
+    }
+
+    private void validateCertWithDb(Order order) {
+        List<Certificate> certificates = new ArrayList<>();
+        for (Certificate certificate : order.getCertificates()) {
+            Optional<Certificate> optional = certificateRepository.findById(certificate.getId());
+            if (optional.isPresent()) {
+                certificates.add(optional.get());
+            } else {
+                throw new CertificateNotFoundException(certificate.getId());
+            }
+        }
+        order.setCertificates(certificates);
     }
 
     private Set<SimpleGrantedAuthority> getAuthority(User user) {
