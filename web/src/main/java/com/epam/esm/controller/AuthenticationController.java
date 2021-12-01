@@ -24,7 +24,7 @@ public class AuthenticationController {
     }
 
 
-    @RequestMapping(value = "/signup", method = RequestMethod.POST)
+    @PostMapping(value = "/signup")
     public void signUp(@RequestBody User user) {
         try {
             service.findUserByUsername(user.getUsername());
