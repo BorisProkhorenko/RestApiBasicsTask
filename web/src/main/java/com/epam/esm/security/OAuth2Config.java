@@ -84,7 +84,8 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
-                .withClient(clientId).secret(encoder.encode(clientSecret))
+                .withClient(clientId)
+                .secret(encoder.encode(clientSecret))
                 .scopes(SCOPE_READ, SCOPE_TRUST)
                 .authorizedGrantTypes(IMPLICIT, RESOURCE_OWNER_CREDENTIALS)
                 .autoApprove(true)
