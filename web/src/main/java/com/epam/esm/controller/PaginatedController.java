@@ -25,7 +25,7 @@ public abstract class PaginatedController<T extends PaginatedController, V exten
     private final static String LAST = "last";
     private final static String REPLACE_REGEX = "\\{.*}";
     private final static String EMPTY = "";
-    private final static int FIRST_PAGE = 1;
+    private final static int FIRST_PAGE = 0;
 
     public PaginatedController(AbstractService service) {
         this.service = service;
