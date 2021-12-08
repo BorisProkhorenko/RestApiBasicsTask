@@ -1,34 +1,31 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dao.TagDao;
+import com.epam.esm.exceptions.TagNotFoundException;
+import com.epam.esm.repository.TagRepository;
 import com.epam.esm.model.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 
 @Service
-public class TagService extends AbstractService<Tag>{
+public class TagService extends AbstractService<Tag> {
 
 
-    private final TagDao dao;
-    private final static int DEFAULT_LIMIT = 20;
-    private final static int DEFAULT_OFFSET = 0;
+    private final TagRepository repository;
 
-    public TagService(TagDao dao) {
-        super(dao);
-        this.dao = dao;
+    public TagService(TagRepository repository) {
+        super(repository);
+        this.repository = repository;
     }
 
     public Tag getMostUsedTagOfUserWithHighestOrdersCost() {
-        return dao.getMostUsedTagOfUserWithHighestOrdersCost();
+        Page<Tag> page = repository.getPageTagOfUserWithHighestOrdersCost(
+                PageRequest.of(0, 1));
+        if(!page.hasContent()){
+            throw new TagNotFoundException("No orders found");
+        }
+        return page.getContent().get(0);
     }
 
-    @Override
-    public int getDefaultOffset() {
-        return DEFAULT_OFFSET;
-    }
-
-    @Override
-    public int getDefaultLimit() {
-        return DEFAULT_LIMIT;
-    }
 }

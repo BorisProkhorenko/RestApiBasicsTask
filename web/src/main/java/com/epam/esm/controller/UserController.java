@@ -3,13 +3,17 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.*;
 import com.epam.esm.exceptions.InvalidRequestException;
+import com.epam.esm.exceptions.UserNotFoundException;
 import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
@@ -38,7 +42,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
  */
 @RestController
 @RequestMapping(value = "/users")
-public class UserController extends PaginatedController<UserController, UserDto,User>{
+public class UserController extends PaginatedController<UserController, UserDto, User> {
 
     private final UserService service;
     private final ObjectMapper objectMapper;
@@ -63,8 +67,13 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @return {@link UserDto} of entity object from DB
      */
     @GetMapping(value = "/{id}")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public UserDto getUserById(@PathVariable Long id) {
-        UserDto user = userDtoMapper.toDto(service.getById(id));
+        Optional<User> optionalUser = service.findById(id);
+        if (!optionalUser.isPresent()) {
+            throw new UserNotFoundException(id);
+        }
+        UserDto user = userDtoMapper.toDto(optionalUser.get());
         for (OrderDto order : user.getOrders()) {
             buildOrderLinks(order);
         }
@@ -78,30 +87,35 @@ public class UserController extends PaginatedController<UserController, UserDto,
     /**
      * Method allows getting all {@link User} entity objects from DB
      *
-     * @param page - page of displayed dto objects
-     * @param size - count of displayed dto objects
+     * @param pageNum - page of displayed dto objects
+     * @param size    - count of displayed dto objects
      * @return {@link CollectionModel} of {@link UserDto} of entity objects from DB without orders.
      */
     @Override
     @GetMapping(produces = {"application/hal+json"})
-    public CollectionModel<UserDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                           @RequestParam(name = "size") Optional<Integer> size) {
-
-        List<UserDto> users = service.getAll(page, size)
-                .stream()
-                .peek(user -> user.setOrders(new HashSet<>()))
-                .map(userDtoMapper::toDto)
-                .collect(Collectors.toList());
-
-        for (UserDto user : users) {
-            Long id = user.getId();
-            Link selfLink = linkTo(UserController.class).slash(id).withSelfRel();
-            user.add(selfLink);
-        }
-        List<Link> links = buildPagination(page, size, UserController.class);
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
+    public CollectionModel<UserDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int pageNum,
+                                           @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
+        Page<User> page = service.findAll(pageNum, size);
+        List<UserDto> users = getUsersFromPage(page);
+        buildUsersLinks(users);
+        List<Link> links = buildPagination(page, UserController.class);
         Link selfLink = linkTo(UserController.class).withSelfRel();
         links.add(selfLink);
         return CollectionModel.of(users, links);
+    }
+
+    /**
+     * Method allows getting {@link User} from DB by authentication
+     *
+     * @param authentication - authentication of actual user
+     * @return {@link UserDto} of entity object from DB
+     */
+    @GetMapping(value = "self",produces = {"application/hal+json"})
+    @PreAuthorize("#oauth2.hasScope('trust')")
+    public UserDto getSelf(Authentication authentication) {
+        User user = getUserByAuthentication(authentication);
+        return getUserById(user.getId());
     }
 
     /**
@@ -112,7 +126,25 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @return {@link OrderDto} of entity object from DB
      */
     @GetMapping(value = "/{userId}/{orderId}")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public OrderDto getOrderByUserAndId(@PathVariable Long userId, @PathVariable Long orderId) {
+        OrderDto order = orderDtoMapper.toDto(service.getOrderByUserAndId(userId, orderId));
+        buildOrderLinks(order);
+        return order;
+    }
+
+    /**
+     * Method allows getting {@link Order} entity object from DB by its id and user(from authentication)
+     *
+     * @param authentication - authentication of actual user
+     * @param orderId - primary key to search {@link Order} entity object in DB
+     * @return {@link OrderDto} of entity object from DB
+     */
+    @GetMapping(value = "/self/{orderId}")
+    @PreAuthorize("#oauth2.hasScope('trust')")
+    public OrderDto getOrderById(Authentication authentication,@PathVariable Long orderId) {
+        User user = getUserByAuthentication(authentication);
+        long userId = user.getId();
         OrderDto order = orderDtoMapper.toDto(service.getOrderByUserAndId(userId, orderId));
         buildOrderLinks(order);
         return order;
@@ -125,19 +157,16 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @return {@link OrderDto} of created entity
      */
     @PostMapping(consumes = "application/json")
-    public OrderDto createOrderOnUser(@RequestBody String json) {
-        try {
-            Order order = objectMapper.readValue(json, Order.class);
-            if (order.getUser() == null || order.getCertificates() == null) {
-                throw new InvalidRequestException("Empty user or certificates");
-            }
-            OrderDto orderDto = orderDtoMapper.toDto(service.createOrder(order));
-            buildOrderLinks(orderDto);
-            return orderDto;
-        } catch (JsonProcessingException e) {
-            throw new InvalidRequestException(e.getMessage());
-        }
+    @PreAuthorize("#oauth2.hasScope('trust')")
+    public OrderDto createOrderOnUser(Authentication authentication, @RequestBody String json) {
+        Order order = readOrderFromJson(json);
+        User user = getUserByAuthentication(authentication);
+        order.setUser(user);
+        OrderDto orderDto = orderDtoMapper.toDto(service.createOrder(order));
+        buildOrderLinks(orderDto);
+        return orderDto;
     }
+
 
     /**
      * Method allows deleting {@link Order} from DB by its id
@@ -145,19 +174,24 @@ public class UserController extends PaginatedController<UserController, UserDto,
      * @param id - primary key to search {@link Order} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public void deleteOrder(@PathVariable Long id) {
         service.deleteOrder(new Order(id));
     }
 
 
     @Override
-    public CollectionModel<UserDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                           @RequestParam(name = "size") Optional<Integer> size,
+    public CollectionModel<UserDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                           @RequestParam(name = "size", required = false, defaultValue = "20") int size,
                                            @RequestParam(name = "filter_by_tags") Optional<String> tags,
                                            @RequestParam(name = "filter_by_part") Optional<String> part,
-                                           @RequestParam(name = "sort_by_name") Optional<String> name,
-                                           @RequestParam(name = "sort_by_date") Optional<String> date) {
-        return getAll(page,size);
+                                           @RequestParam(name = "sort_by", required = false) String sort) {
+        return getAll(page, size);
+    }
+
+    private User getUserByAuthentication(Authentication authentication) {
+        String username = authentication.getName();
+        return service.findUserByUsername(username);
     }
 
     private void buildOrderLinks(OrderDto order) {
@@ -172,6 +206,33 @@ public class UserController extends PaginatedController<UserController, UserDto,
         order.add(selfLink);
     }
 
+    private List<UserDto> getUsersFromPage(Page<User> page) {
+        return page.getContent()
+                .stream()
+                .peek(user -> user.setOrders(new HashSet<>()))
+                .map(userDtoMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private void buildUsersLinks(List<UserDto> users) {
+        for (UserDto user : users) {
+            Long id = user.getId();
+            Link selfLink = linkTo(UserController.class).slash(id).withSelfRel();
+            user.add(selfLink);
+        }
+    }
+
+    private Order readOrderFromJson(String json) {
+        try {
+            Order order = objectMapper.readValue(json, Order.class);
+            if (order.getCertificates() == null) {
+                throw new InvalidRequestException("Empty  certificates");
+            }
+            return order;
+        } catch (JsonProcessingException e) {
+            throw new InvalidRequestException(e.getMessage());
+        }
+    }
 
 
 }

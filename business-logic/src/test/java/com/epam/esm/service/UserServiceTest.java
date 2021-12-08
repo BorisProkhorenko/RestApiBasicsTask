@@ -1,108 +1,111 @@
 package com.epam.esm.service;
 
 import com.epam.esm.config.RepoApplication;
-import com.epam.esm.dao.OrderDao;
-import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.UserDao;
-import com.epam.esm.exceptions.CertificateNotFoundException;
 import com.epam.esm.exceptions.OrderNotFoundException;
 import com.epam.esm.model.Order;
-import com.epam.esm.model.Tag;
 import com.epam.esm.model.User;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static javafx.scene.input.KeyCode.H;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = RepoApplication.class)
 @ActiveProfiles("test")
+@TestPropertySource(
+        locations = "classpath:application-test.properties")
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@Transactional
 public class UserServiceTest {
 
-    private static UserService service;
-    private final static long MOCK_ID = 1L;
-    private final static long OTHER_MOCK_ID = 2L;
-
-    @BeforeAll
-    public static void init() {
-        UserDao mockUserDao = Mockito.mock(UserDao.class);
-        when(mockUserDao.getById(anyLong()))
-                .thenReturn(new User(MOCK_ID));
-        when(mockUserDao.create(any()))
-                .thenReturn(new User(MOCK_ID));
-        when(mockUserDao.getAll(0,5))
-                .thenReturn(new ArrayList<>());
-        OrderDao mockOrderDao = Mockito.mock(OrderDao.class);
-        when(mockOrderDao.getById(MOCK_ID))
-                .thenReturn(new Order(MOCK_ID,new User(MOCK_ID), new ArrayList<>()));
-        when(mockOrderDao.getById(OTHER_MOCK_ID))
-                .thenReturn(new Order(OTHER_MOCK_ID,new User(OTHER_MOCK_ID), new ArrayList<>()));
-
-        when(mockOrderDao.create(any()))
-                .thenReturn(new Order(MOCK_ID,new User(MOCK_ID), new ArrayList<>()));
-        when(mockOrderDao.getAll(0,5))
-                .thenReturn(new ArrayList<>());
-        service = new UserService(mockUserDao,mockOrderDao);
-    }
-
-
+    @Autowired
+    private UserService service;
 
     @Test
-    public void testGetAllUsers() {
-        //when
-        List<User> users = service.getAll(Optional.of(10),Optional.of(0));
-        //then
-        Assertions.assertNotNull(users);
-    }
-
-    @Test
-    public void testGetUserById() {
-        //when
-        User user = service.getById(MOCK_ID);
-        //then
-        Assertions.assertEquals(user.getId(), MOCK_ID);
-    }
-
-    @Test
-    public void testCreateUser() {
+    public void testCreateAndGetByIdOk() {
         //given
-        User mockUser = new User(MOCK_ID);
+        User user = new User(1, "name", new HashSet<>());
+        user.setPassword("");
         //when
-        User user = service.create(mockUser);
+        service.create(user);
+        Optional<User> optionalUser = service.findById(1L);
         //then
-        Assertions.assertEquals(user.getId(), mockUser.getId());
+        Assertions.assertEquals("name", optionalUser.get().getUsername());
     }
 
     @Test
-    public void testGetOrderByUserAndIdOk() {
+    public void testCreateAndGetAllOk() {
         //given
-        User mockUser = new User(MOCK_ID);
-        Order mockOrder = new Order(MOCK_ID,mockUser, new ArrayList<>());
+        User user = new User(1, "name", new HashSet<>());
+        user.setPassword("");
         //when
-        Order order = service.getOrderByUserAndId(mockUser.getId(),mockOrder.getId());
+        service.create(user);
+        Page<User> users = service.findAll(0, 5);
         //then
-        Assertions.assertEquals(order.getId(), mockOrder.getId());
+        Assertions.assertEquals(1, users.getContent().size());
+    }
+
+    @Test()
+    public void testCreateAndDeleteByIdEmpty() {
+        //given
+        User user = new User(1, "name", new HashSet<>());
+        user.setPassword("");
+        //when
+        service.create(user);
+        service.delete(user);
+        Optional<User> fromDb = service.findById(1L);
+        //then
+        Assertions.assertFalse(fromDb.isPresent());
     }
 
     @Test
-    public void testGetOrderByUserAndIdException() {
+    public void testCreateAndGetByUsernameOk() {
         //given
-        User mockUser = new User(MOCK_ID);
-        Order mockOrder = new Order(OTHER_MOCK_ID);
+        User user = new User(1, "name", new HashSet<>());
+        user.setPassword("");
+        //when
+        service.create(user);
+        User fromDb = service.findUserByUsername("name");
+        //then
+        Assertions.assertEquals("name", fromDb.getUsername());
+    }
+
+    @Test
+    public void testCreateOrderAndGetByByUserAndIdOk() {
+        //given
+        User user = new User(1, "name", new HashSet<>());
+        user.setPassword("");
+        Order order = new Order(1, user, new ArrayList<>());
+        //when
+        service.create(user);
+        service.createOrder(order);
+        Order fromDb = service.getOrderByUserAndId(user.getId(), order.getId());
+        //then
+        Assertions.assertEquals(order.getId(), fromDb.getId());
+    }
+
+    @Test
+    public void testCreateOrderAndDeleteAndGetByByUserAndIdError() {
+        //given
+        User user = new User(1, "name", new HashSet<>());
+        user.setPassword("");
+        Order order = new Order(1, user, new ArrayList<>());
+        service.create(user);
+        service.createOrder(order);
+        service.deleteOrder(order);
         //then
         Assertions.assertThrows(OrderNotFoundException.class, () ->
-                        service.getOrderByUserAndId(mockUser.getId(),mockOrder.getId()));
-
+                service.getOrderByUserAndId(user.getId(), order.getId()));
     }
 }

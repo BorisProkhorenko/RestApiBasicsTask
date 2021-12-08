@@ -4,13 +4,16 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.TagDtoMapper;
 import com.epam.esm.exceptions.InvalidRequestException;
+import com.epam.esm.exceptions.TagNotFoundException;
 import com.epam.esm.model.Tag;
 import com.epam.esm.model.User;
 import com.epam.esm.service.TagService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,7 +65,11 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      */
     @GetMapping(value = "/{id}")
     public TagDto getTagById(@PathVariable Long id) {
-        TagDto tag = dtoMapper.toDto(service.getById(id));
+        Optional<Tag> optionalTag = service.findById(id);
+        if (!optionalTag.isPresent()) {
+            throw new TagNotFoundException(id);
+        }
+        TagDto tag = dtoMapper.toDto(optionalTag.get());
         buildTagLinks(tag);
         return tag;
     }
@@ -70,21 +77,22 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
     /**
      * Method allows getting all {@link Tag} entity objects from DB
      *
-     * @param page - page of displayed dto objects
-     * @param size - count of displayed dto objects
+     * @param pageNum - page of displayed dto objects
+     * @param size    - count of displayed dto objects
      * @return {@link CollectionModel} of {@link TagDto} of entity objects from DB
      */
     @Override
     @GetMapping(produces = {"application/hal+json"})
-    public CollectionModel<TagDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                          @RequestParam(name = "size") Optional<Integer> size) {
+    public CollectionModel<TagDto> getAll( @RequestParam(name = "page", required = false, defaultValue = "0") int pageNum,
+                                          @RequestParam(name = "size", required = false, defaultValue = "20") int size) {
 
-        List<TagDto> tags = service.getAll(page, size)
+        Page<Tag> page = service.findAll(pageNum, size);
+        List<TagDto> tags = page.getContent()
                 .stream()
                 .map(dtoMapper::toDto)
                 .collect(Collectors.toList());
         buildTagCollectionLinks(tags);
-        List<Link> links = buildPagination(page, size, TagController.class);
+        List<Link> links = buildPagination(page, TagController.class);
         Link mostUsedTag = linkTo(TagController.class).slash(MOST_USED_TAG_URL).withRel(MOST_USED_TAG);
         links.add(mostUsedTag);
         Link selfLink = linkTo(TagController.class).withSelfRel();
@@ -94,13 +102,12 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
     }
 
     @Override
-    public CollectionModel<TagDto> getAll(@RequestParam(name = "page") Optional<Integer> page,
-                                          @RequestParam(name = "size") Optional<Integer> size,
+    public CollectionModel<TagDto> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                          @RequestParam(name = "size", required = false, defaultValue = "20") int size,
                                           @RequestParam(name = "filter_by_tags") Optional<String> tags,
                                           @RequestParam(name = "filter_by_part") Optional<String> part,
-                                          @RequestParam(name = "sort_by_name") Optional<String> name,
-                                          @RequestParam(name = "sort_by_date") Optional<String> date) {
-        return getAll(page, size);
+                                          @RequestParam(name = "sort_by", required = false) String sort) {
+        return getAll( page, size);
     }
 
     /**
@@ -110,6 +117,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      * @return {@link TagDto} of object, which you created
      */
     @PostMapping(consumes = "application/json")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public TagDto createTag(@RequestBody String json) {
         try {
             Tag tag = objectMapper.readValue(json, Tag.class);
@@ -128,6 +136,7 @@ public class TagController extends PaginatedController<TagController, TagDto, Ta
      * @param id - primary key to search {@link Tag} entity object in DB
      */
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("#oauth2.hasScope('write') and hasRole('ROLE_ADMIN')")
     public void deleteTag(@PathVariable Long id) {
         service.delete(new Tag(id));
     }

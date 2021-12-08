@@ -1,6 +1,7 @@
 package com.epam.esm.model;
 
 
+import com.sun.istack.NotNull;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -15,12 +16,22 @@ import java.util.Set;
 @Audited
 public class User implements Identifiable{
 
+    public enum Role {USER, ADMIN}
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true)
+    @Column(nullable = false,unique = true)
     private String username;
+
+    @NotAudited
+    @Column(nullable = false)
+    private String password;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @NotAudited
     @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
@@ -38,6 +49,7 @@ public class User implements Identifiable{
         this.username = username;
         this.orders = orders;
     }
+
 
     public long getId() {
         return id;
@@ -63,6 +75,22 @@ public class User implements Identifiable{
         this.username = username;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,13 +99,17 @@ public class User implements Identifiable{
         User user = (User) o;
 
         if (id != user.id) return false;
-        return Objects.equals(username, user.username);
+        if (!Objects.equals(username, user.username)) return false;
+        if (!Objects.equals(password, user.password)) return false;
+        return Objects.equals(role, user.role);
     }
 
     @Override
     public int hashCode() {
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (role != null ? role.hashCode() : 0);
         return result;
     }
 
@@ -86,7 +118,8 @@ public class User implements Identifiable{
         return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", orders='" + orders + '\'' +
+                ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
                 '}';
     }
 }
